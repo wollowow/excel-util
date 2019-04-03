@@ -1,6 +1,5 @@
 package com.angla.plugins.excel.analysis.anno;
 
-import com.angla.plugins.excel.analysis.anno.interfaces.RowVerify;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -17,7 +16,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface AnalysisClass {
-    Class rowVerify() default RowVerify.class;  //自定义行验证规则
     int maxRow() default Integer.MAX_VALUE;     //最大行数
     int minRow() default 1;                     //最小行数
     int maxColumn() default Integer.MAX_VALUE;  //最大列数

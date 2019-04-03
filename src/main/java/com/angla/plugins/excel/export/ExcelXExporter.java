@@ -4,12 +4,12 @@ import com.angla.plugins.excel.commons.enums.ExcelTypeEnum;
 import com.angla.plugins.excel.commons.throwable.exception.ExcelEmptyException;
 import com.angla.plugins.excel.commons.throwable.exception.ParameterException;
 import com.angla.plugins.excel.export.anno.ExportAnnoManager;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
 import java.util.List;
@@ -50,7 +50,6 @@ public class ExcelXExporter extends AbstractExporter {
         }
         for (int i = 0; i < datas.size(); i++) {
             List<String> data = datas.get(i);
-            //从第二行开始写入数据
             Row row = sheet.createRow(i + 1);
             for (int j = 0; j < data.size(); j++) {
                 Cell cell = row.createCell(j);

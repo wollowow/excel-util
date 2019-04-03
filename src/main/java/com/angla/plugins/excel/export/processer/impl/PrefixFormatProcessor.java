@@ -11,7 +11,7 @@ import com.angla.plugins.excel.export.anno.ExportFieldBean;
  * @author angla
  **/
 public class PrefixFormatProcessor implements ExportAnnoProcessor {
-    public String process(Object value, ExportFieldBean exportField) throws ParameterException {
+    public String process(Object value, ExportFieldBean exportField) {
         value = value == null ? "":value;
        return exportField.getPrefix() + value;
     }

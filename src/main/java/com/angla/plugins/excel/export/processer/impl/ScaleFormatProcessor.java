@@ -16,7 +16,7 @@ public class ScaleFormatProcessor implements ExportAnnoProcessor {
 
     public Object process(Object value, ExportFieldBean exportFieldBean) throws ParameterException {
         if(null == value){
-            return value;
+            return null;
         }
         Number data;
         try {

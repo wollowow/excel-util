@@ -1,6 +1,5 @@
 package com.angla.plugins.excel;
 
-import com.angla.plugins.excel.analysis.AnalysisExcel;
 import com.angla.plugins.excel.commons.enums.ExcelTypeEnum;
 import com.angla.plugins.excel.export.ExcelExporter;
 import com.angla.plugins.excel.export.ExcelXExporter;
@@ -18,13 +17,6 @@ import java.util.Map;
  * @Version 1.0
  **/
 public class ExcelFactory<T> {
-    private ExcelFactory() {
-    }
-
-    //获取excel的上传对象
-    public static AnalysisExcel getAnalysisExcel() {
-        return new AnalysisExcel();
-    }
 
 
     /**

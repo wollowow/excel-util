@@ -3,7 +3,7 @@ package com.angla.plugins.excel.export.anno;
 import com.angla.plugins.excel.commons.throwable.exception.AnnotationException;
 import com.angla.plugins.excel.commons.throwable.exception.ParameterException;
 import com.angla.plugins.excel.export.processer.ExportAnnoProcessor;
-import org.springframework.util.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -150,11 +150,10 @@ public class ExportAnnoManager {
         if (CollectionUtils.isEmpty(columns)) {
             return true;
         }
-        Set<String> set = new HashSet<>();
-        set.addAll(columns);
+        Set<String> set = new HashSet<>(columns);
         //传入列名称不可重复
         if (set.size() < columns.size()) {
-            throw new ParameterException("传入导出列不能重复");
+            throw new ParameterException("导出列不能重复");
         }
         List<String> fieldNames = new ArrayList<>();
         for (Field field : fields) {

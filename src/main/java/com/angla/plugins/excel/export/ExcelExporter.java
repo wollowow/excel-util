@@ -62,20 +62,8 @@ public class ExcelExporter<T> extends AbstractExporter<T> {
         return workBook;
     }
 
-
     public boolean modelExport() {
         return super.modelExport();
     }
 
-
-    public Class<T> getTClass() {
-        return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-    }
-
-    public void test() {
-        System.out.println(getTClass());
-    }
-
-    public static void main(String s[]) {
-    }
 }

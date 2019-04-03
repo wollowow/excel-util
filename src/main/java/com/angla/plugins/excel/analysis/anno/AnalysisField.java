@@ -1,6 +1,5 @@
 package com.angla.plugins.excel.analysis.anno;
 
-import com.angla.plugins.excel.analysis.anno.interfaces.FieldTranform;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,8 +17,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface AnalysisField {
     String  name() default "";                              //中文名字
-    boolean must() default false;                           //是否必填
+    boolean required() default false;                       //是否必填
     String regex() default "";                              //自定义正则
     int[] uniNos() default {};                              //是否唯一， 如果唯一的话 则其默认must
-    Class transform() default FieldTranform.class;          //定义excel中的转换格式
+//    Class transform() default FieldTranform.class;          //定义excel中的转换格式
 }

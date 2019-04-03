@@ -94,7 +94,7 @@ public class ExportFieldBean {
      *
      * @return
      */
-    public List<ExportAnnoProcessor> getProcessors() {
+    List<ExportAnnoProcessor> getProcessors() {
         List<ExportAnnoProcessor> exportAnnoProcessers = new ArrayList<>();
         if (null != enumRule) {
             exportAnnoProcessers.add(new EnumFormatProcessor());

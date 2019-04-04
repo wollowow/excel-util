@@ -1,6 +1,17 @@
 package com.angla.demo.excel;
 
-import java.lang.reflect.ParameterizedType;
+import com.angla.plugins.excel.ExcelFactory;
+import com.angla.plugins.excel.export.ExcelExporter;
+import com.angla.plugins.excel.export.Exporter;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Title:Test
@@ -8,15 +19,25 @@ import java.lang.reflect.ParameterizedType;
  * @author angla
  **/
 public class Test<T> {
-    public Class<T> getTClass() {
-        return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-    }
+    public static void main(String s[]) throws Exception {
 
-    public void test() {
-        System.out.println(getTClass());
-    }
+        List<ExportBean> exportBeans = new ArrayList<>();
+        Date current = new Date();
+        for (int i = 0; i < 100; i++) {
 
-    public static void main(String s[]) {
-        (new Test<ExportBean>() {}).test(); // class java.lang.String
+            ExportBean exportBean = new ExportBean();
+            exportBean.setCreateTime(current);
+            exportBean.setId(Long.parseLong(i+""));
+            exportBean.setMoney(new BigDecimal("2.33"));
+            exportBean.setName("张三");
+            exportBeans.add(exportBean);
+        }
+
+        Exporter<ExportBean> exporter = ExcelFactory.initExporter(exportBeans);
+        Workbook workbook = exporter.generalExport();
+        OutputStream outputStream = new FileOutputStream(new File("/Users/menghualiu/Desktop/tes.xls"));
+
+        workbook.write(outputStream);
+        outputStream.close();
     }
 }

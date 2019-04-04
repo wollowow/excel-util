@@ -3,7 +3,6 @@ package com.angla.plugins.excel.export;
 import com.angla.plugins.excel.commons.enums.ExcelTypeEnum;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -14,25 +13,17 @@ import java.util.List;
  **/
 public abstract class AbstractExporter<T> implements Exporter<T> {
 
-    Object data;
+    List<T> data;
     List<String> columns;
-    private InputStream model;
     private ExcelTypeEnum excelEnum;
 
-    AbstractExporter(Object data, InputStream model, ExcelTypeEnum excelEnum, List<String> columns) {
+    AbstractExporter(List<T> data, ExcelTypeEnum excelEnum, List<String> columns) {
         this.data = data;
-        this.model = model;
         this.excelEnum = excelEnum;
         this.columns = columns;
     }
 
     public abstract Workbook generalExport() throws Exception;
-
-    public boolean modelExport() {
-        // TODO: 2018/8/9 模板导出待开发
-        System.out.println("模板导出");
-        return false;
-    }
 
     public Workbook listExport() throws Exception {
 //        boolean flag = data instanceof List;
@@ -48,7 +39,7 @@ public abstract class AbstractExporter<T> implements Exporter<T> {
 //            throw new ParameterException("传入参数错误，需要List<List<Object>>类型数据");
 //        }
 //        boolean isXlsx = true;
-//        if(ExcelTypeEnum.EXCEL_2003.equals(excelEnum)){
+//        if(ExcelTypeEnum.EXCEL_XLS.equals(excelEnum)){
 //            isXlsx = false;
 //        }
 //        ExcelWriter writer = ExcelUtil.getWriter(isXlsx);

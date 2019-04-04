@@ -5,8 +5,8 @@ package com.angla.plugins.excel.commons.enums;
  */
 public enum ExcelTypeEnum {
 
-    EXCEL_2007(".xlsx", "504B0304",1048576),
-    EXCEL_2003(".xls", "D0CF11E0",65536);
+    EXCEL_XLSX(".xlsx", "504B0304",1048576),
+    EXCEL_XLS(".xls", "D0CF11E0",65536);
 
     ExcelTypeEnum(String suffix, String fileHeader, Integer maxSize) {
         this.suffix = suffix;

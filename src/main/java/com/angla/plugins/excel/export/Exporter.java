@@ -25,12 +25,6 @@ public interface Exporter<T> {
      */
     Workbook listExport() throws Exception;
 
-    /**
-     * 带模板导出
-     *
-     * @return
-     */
-    boolean modelExport();
 
     /**
      * 获取excel信息

@@ -11,7 +11,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -19,23 +18,23 @@ import java.util.List;
  *
  * @author angla
  **/
-public class ExcelXExporter extends AbstractExporter {
+public class ExcelXExporter<T> extends AbstractExporter<T> {
 
-    public ExcelXExporter(Object data, InputStream model, List<String> columns) {
-        super(data, model, ExcelTypeEnum.EXCEL_2007, columns);
+    public ExcelXExporter(List<T> data, List<String> columns) {
+        super(data, ExcelTypeEnum.EXCEL_XLSX, columns);
     }
+
     public Workbook generalExport() throws Exception {
-        boolean flag = data instanceof List;
-        if (!flag) {
+
+        if (data == null) {
             throw new ParameterException("传入参数错误，需要List");
         }
-        List list = (List) data;
-        if (CollectionUtils.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(data)) {
             throw new ExcelEmptyException("导出数据为空！");
         }
-        Class tClass = list.get(0).getClass();
+        Class tClass = data.get(0).getClass();
         ExportAnnoManager exportAnnoManager = new ExportAnnoManager();
-        exportAnnoManager.init(list, tClass, columns);
+        exportAnnoManager.init(data, tClass, columns);
         List<String> titles = exportAnnoManager.getTitles();
         List<List<String>> datas = exportAnnoManager.getDatas();
         /**读取excel文档，超过100行写入硬盘防止内存溢出.*/
@@ -57,9 +56,5 @@ public class ExcelXExporter extends AbstractExporter {
             }
         }
         return workBook;
-    }
-
-    public boolean modelExport() {
-        return super.modelExport();
     }
 }

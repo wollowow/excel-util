@@ -1,9 +1,11 @@
 package com.angla.plugins.excel;
 
 import com.angla.plugins.excel.commons.enums.ExcelTypeEnum;
+import com.angla.plugins.excel.commons.throwable.exception.ParameterException;
 import com.angla.plugins.excel.export.ExcelExporter;
 import com.angla.plugins.excel.export.ExcelXExporter;
 import com.angla.plugins.excel.export.Exporter;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 
@@ -24,9 +26,11 @@ public class ExcelFactory {
      * @return
      */
     private static<T> Exporter<T> initExporter(List<T> data , ExcelTypeEnum excelEnum,
-                                         List<String> columns) {
+                                         List<String> columns) throws ParameterException {
 
-        
+        if(CollectionUtils.isEmpty(data)){
+            throw new ParameterException("导出数据不能为空");
+        }
         if (ExcelTypeEnum.EXCEL_XLS.equals(excelEnum)) {
             if (null != data) {
                 return new ExcelExporter(data, columns);
@@ -45,7 +49,7 @@ public class ExcelFactory {
      * @param data 导出数据
      * @return
      */
-    public static<T> Exporter<T> initExporter(List<T> data) {
+    public static<T> Exporter<T> initExporter(List<T> data) throws ParameterException {
         return initExporter(data, null, null);
     }
 
@@ -56,7 +60,7 @@ public class ExcelFactory {
      * @param data 导出数据
      * @return
      */
-    public static<T> Exporter<T> initExporter(List<T> data,List<String> columns) {
+    public static<T> Exporter<T> initExporter(List<T> data,List<String> columns) throws ParameterException {
         return initExporter(data, null, columns);
     }
 
@@ -67,7 +71,7 @@ public class ExcelFactory {
      * @param data 导出数据
      * @return
      */
-    public static<T> Exporter<T> initExporter(List<T> data, ExcelTypeEnum excelEnum) {
+    public static<T> Exporter<T> initExporter(List<T> data, ExcelTypeEnum excelEnum) throws ParameterException {
         return initExporter(data, excelEnum,null);
     }
 

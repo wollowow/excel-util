@@ -1,39 +1,39 @@
 package com.angla.plugins.excel;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.poi.ooxml.util.SAXHelper;
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
-import org.apache.poi.xssf.model.SharedStrings;
-import org.apache.poi.xssf.model.Styles;
-import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler;
 import org.apache.poi.xssf.extractor.XSSFEventBasedExcelExtractor;
+import org.apache.poi.xssf.model.SharedStrings;
+import org.apache.poi.xssf.model.Styles;
+import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 /**
  * A rudimentary XLSX -> CSV processor modeled on the
  * POI sample program XLS2CSVmra from the package
  * org.apache.poi.hssf.eventusermodel.examples.
  * As with the HSSF version, this tries to spot missing
- *  rows and cells, and output empty entries for them.
+ * rows and cells, and output empty entries for them.
  * <p>
  * Data sheets are read using a SAX parser to keep the
  * memory footprint relatively small, so this should be
@@ -47,24 +47,26 @@ import org.xml.sax.XMLReader;
  * For a more advanced implementation of SAX event parsing
  * of XLSX files, see {@link XSSFEventBasedExcelExtractor}
  * and {@link XSSFSheetXMLHandler}. Note that for many cases,
- * it may be possible to simply use those with a custom 
+ * it may be possible to simply use those with a custom
  * {@link SheetContentsHandler} and no SAX code needed of
  * your own!
  */
 public class XLSX2CSV {
     /**
      * Uses the XSSF Event SAX helpers to do most of the work
-     *  of parsing the Sheet XML, and outputs the contents
-     *  as a (basic) CSV.
+     * of parsing the Sheet XML, and outputs the contents
+     * as a (basic) CSV.
      */
     private class SheetToCSV implements SheetContentsHandler {
+
         private boolean firstCellOfRow;
         private int currentRow = -1;
         private int currentCol = -1;
 
+
         private void outputMissingRows(int number) {
-            for (int i=0; i<number; i++) {
-                for (int j=0; j<minColumns; j++) {
+            for (int i = 0; i < number; i++) {
+                for (int j = 0; j < minColumns; j++) {
                     output.append(',');
                 }
                 output.append('\n');
@@ -74,7 +76,7 @@ public class XLSX2CSV {
         @Override
         public void startRow(int rowNum) {
             // If there were gaps, output the missing rows
-            outputMissingRows(rowNum-currentRow-1);
+            outputMissingRows(rowNum - currentRow - 1);
             // Prepare for this row
             firstCellOfRow = true;
             currentRow = rowNum;
@@ -84,7 +86,7 @@ public class XLSX2CSV {
         @Override
         public void endRow(int rowNum) {
             // Ensure the minimum number of columns
-            for (int i=currentCol; i<minColumns; i++) {
+            for (int i = currentCol; i < minColumns; i++) {
                 output.append(',');
             }
             output.append('\n');
@@ -100,14 +102,14 @@ public class XLSX2CSV {
             }
 
             // gracefully handle missing CellRef here in a similar way as XSSFCell does
-            if(cellReference == null) {
+            if (cellReference == null) {
                 cellReference = new CellAddress(currentRow, currentCol).formatAsString();
             }
 
             // Did we miss any cells?
             int thisCol = (new CellReference(cellReference)).getCol();
             int missedCols = thisCol - currentCol - 1;
-            for (int i=0; i<missedCols; i++) {
+            for (int i = 0; i < missedCols; i++) {
                 output.append(',');
             }
             currentCol = thisCol;
@@ -128,7 +130,6 @@ public class XLSX2CSV {
 
         }
     }
-
 
 
     private final OPCPackage xlsxPackage;
@@ -160,14 +161,13 @@ public class XLSX2CSV {
      * Parses and shows the content of one sheet
      * using the specified styles and shared-strings tables.
      *
-     * @param styles The table of styles that may be referenced by cells in the sheet
-     * @param strings The table of strings that may be referenced by cells in the sheet
+     * @param styles           The table of styles that may be referenced by cells in the sheet
+     * @param strings          The table of strings that may be referenced by cells in the sheet
      * @param sheetInputStream The stream to read the sheet-data from.
-
-     * @exception java.io.IOException An IO exception from the parser,
-     *            possibly from a byte stream or character stream
-     *            supplied by the application.
-     * @throws SAXException if parsing the XML data fails.
+     * @throws java.io.IOException An IO exception from the parser,
+     *                             possibly from a byte stream or character stream
+     *                             supplied by the application.
+     * @throws SAXException        if parsing the XML data fails.
      */
     public void processSheet(
             Styles styles,
@@ -182,7 +182,7 @@ public class XLSX2CSV {
                     styles, null, strings, sheetHandler, formatter, false);
             sheetParser.setContentHandler(handler);
             sheetParser.parse(sheetSource);
-        } catch(ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             throw new RuntimeException("SAX parser appears to be broken - " + e.getMessage());
         }
     }
@@ -190,11 +190,11 @@ public class XLSX2CSV {
     /**
      * Initiates the processing of the XLS workbook file to CSV.
      *
-     * @throws IOException If reading the data from the package fails.
+     * @throws IOException  If reading the data from the package fails.
      * @throws SAXException if parsing the XML data fails.
      */
     public void process() throws IOException, OpenXML4JException, SAXException {
-        ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(this.xlsxPackage);
+        MyReadOnlySharedStringsTable strings = new MyReadOnlySharedStringsTable(this.xlsxPackage);
         XSSFReader xssfReader = new XSSFReader(this.xlsxPackage);
         StylesTable styles = xssfReader.getStylesTable();
         XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
@@ -213,15 +213,13 @@ public class XLSX2CSV {
     public static void main(String[] args) throws Exception {
 
         Long start = System.currentTimeMillis();
-        File xlsxFile = new File("/Users/menghualiu/Desktop/test1.xls");
+        File xlsxFile = new File("/Users/menghualiu/Desktop/test.xlsx");
         if (!xlsxFile.exists()) {
             System.err.println("Not found or not a file: " + xlsxFile.getPath());
             return;
         }
 
         int minColumns = -1;
-        if (args.length >= 2)
-            minColumns = Integer.parseInt(args[1]);
 
         // The package open is instantaneous, as it should be.
         try (OPCPackage p = OPCPackage.open(xlsxFile.getPath(), PackageAccess.READ)) {
@@ -229,7 +227,6 @@ public class XLSX2CSV {
             xlsx2csv.process();
         }
         Long end = System.currentTimeMillis();
-
-        System.out.println("共耗时:"+(end - start));
+        System.out.println("共耗时:" + (end - start));
     }
 }

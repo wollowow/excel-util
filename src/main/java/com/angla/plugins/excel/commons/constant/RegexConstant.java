@@ -1,7 +1,5 @@
 package com.angla.plugins.excel.commons.constant;
 
-import java.util.regex.Pattern;
-
 /**
  * @program: excel-util
  * @description: 常用正则表达式

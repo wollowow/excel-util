@@ -1,5 +1,12 @@
 package com.angla.plugins.excel;
 
+import com.angla.plugins.excel.commons.throwable.ExcelException;
+import com.angla.plugins.excel.commons.throwable.exception.AnnotationException;
+import com.angla.plugins.excel.inventor.Student;
+import com.angla.plugins.excel.inventor.anno.InventorField;
+import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
+import com.angla.plugins.excel.inventor.format.CellValueFormater;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -10,7 +17,6 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler;
-import org.apache.poi.xssf.extractor.XSSFEventBasedExcelExtractor;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.Styles;
 import org.apache.poi.xssf.model.StylesTable;
@@ -23,35 +29,22 @@ import org.xml.sax.XMLReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.rmi.server.ExportException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
- * A rudimentary XLSX -> CSV processor modeled on the
- * POI sample program XLS2CSVmra from the package
- * org.apache.poi.hssf.eventusermodel.examples.
- * As with the HSSF version, this tries to spot missing
- * rows and cells, and output empty entries for them.
- * <p>
- * Data sheets are read using a SAX parser to keep the
- * memory footprint relatively small, so this should be
- * able to read enormous workbooks.  The styles table and
- * the shared-string table must be kept in memory.  The
- * standard POI styles table class is used, but a custom
- * (read-only) class is used for the shared string table
- * because the standard POI SharedStringsTable grows very
- * quickly with the number of unique strings.
- * <p>
- * For a more advanced implementation of SAX event parsing
- * of XLSX files, see {@link XSSFEventBasedExcelExtractor}
- * and {@link XSSFSheetXMLHandler}. Note that for many cases,
- * it may be possible to simply use those with a custom
- * {@link SheetContentsHandler} and no SAX code needed of
- * your own!
+ * xlsx转成对象属性值
  */
-public class XLSX2CSV {
+public class XLSX2Object<T> {
     /**
      * Uses the XSSF Event SAX helpers to do most of the work
      * of parsing the Sheet XML, and outputs the contents
@@ -60,120 +53,171 @@ public class XLSX2CSV {
     private class SheetToCSV implements SheetContentsHandler {
 
         private boolean firstCellOfRow;
+        private boolean firstRow = true;
         private int currentRow = -1;
         private int currentCol = -1;
 
 
         private void outputMissingRows(int number) {
-            for (int i = 0; i < number; i++) {
-                for (int j = 0; j < minColumns; j++) {
-                    output.append(',');
-                }
-                output.append('\n');
-            }
+            currentRow += number;
         }
+
 
         @Override
         public void startRow(int rowNum) {
-            // If there were gaps, output the missing rows
+            // If there were gaps, continue
             outputMissingRows(rowNum - currentRow - 1);
             // Prepare for this row
             firstCellOfRow = true;
             currentRow = rowNum;
             currentCol = -1;
+            try {
+                t = clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new ExcelException("生成带转换的类异常!");
+            }
         }
 
         @Override
         public void endRow(int rowNum) {
-            // Ensure the minimum number of columns
-            for (int i = currentCol; i < minColumns; i++) {
-                output.append(',');
+            if (!firstRow) {
+                result.add(t);
+                t = null;
             }
-            output.append('\n');
+            if (firstRow) {
+                firstRow = false;
+            }
         }
 
         @Override
         public void cell(String cellReference, String formattedValue,
                          XSSFComment comment) {
+
+            if (firstRow) {
+                titles.add(formattedValue);
+                return;
+            }
             if (firstCellOfRow) {
                 firstCellOfRow = false;
-            } else {
-                output.append(',');
             }
-
-            // gracefully handle missing CellRef here in a similar way as XSSFCell does
             if (cellReference == null) {
                 cellReference = new CellAddress(currentRow, currentCol).formatAsString();
             }
 
-            // Did we miss any cells?
-            int thisCol = (new CellReference(cellReference)).getCol();
-            int missedCols = thisCol - currentCol - 1;
-            for (int i = 0; i < missedCols; i++) {
-                output.append(',');
-            }
-            currentCol = thisCol;
+            currentCol = (int) (new CellReference(cellReference)).getCol();
 
-            // Number or string?
             try {
-                //noinspection ResultOfMethodCallIgnored
-                Double.parseDouble(formattedValue);
-                output.append(formattedValue);
-            } catch (NumberFormatException e) {
-                output.append('"');
-                output.append(formattedValue);
-                output.append('"');
+                if (CollectionUtils.isEmpty(titles)) {
+                    throw new ExcelException("未查询到标题行");
+                }
+                String name = titles.get(currentCol);
+                Field field = name2FieldMap.get(name);
+                if (null == field) {
+                    return;
+                }
+                String methodName =
+                        "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+                Method method = clazz.getMethod(methodName, field.getType());
+                method.setAccessible(true);
+                method.invoke(t, formater.formatValue(formattedValue, field.getGenericType().toString()));
+            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | ParseException e) {
+                throw new ExcelException("解析异常!", e);
             }
         }
-
         public void headerFooter(String s, boolean b, String s1) {
-
         }
     }
 
 
     private final OPCPackage xlsxPackage;
 
-    /**
-     * Number of columns to read starting with leftmost
-     */
-    private final int minColumns;
 
     /**
      * Destination for data
      */
-    private final PrintStream output;
+    private final List<T> result = new ArrayList<>();
+
+    public List<T> getResult() {
+        return result;
+    }
+
+    private T t;
+
+    /**
+     * 标题
+     */
+    private List<String> titles = new ArrayList<>();
+
+    public List<String> getTitles() {
+        return titles;
+    }
+
+    private CellValueFormater formater;
+
+    private Class<T> clazz;
+
+    /**
+     * 名称和属性关联
+     */
+    private Map<String, Field> name2FieldMap = new HashMap<>();
+
+
+    private void buildNameAndField() throws AnnotationException {
+
+        Field[] fields = clazz.getDeclaredFields();
+
+        for (Field field : fields) {
+            InventorField inventorField = field.getAnnotation(InventorField.class);
+            if (null == inventorField) {
+                continue;
+            }
+            String name = inventorField.name();
+            if ("".equals(name)) {
+                throw new AnnotationException("注解name不能为空");
+            }
+            name2FieldMap.put(name, field);
+        }
+
+        if (CollectionUtils.isEmpty(name2FieldMap.entrySet())) {
+            throw new AnnotationException("需要为转化的属性配置@InventorField注解");
+        }
+    }
 
     /**
      * Creates a new XLSX -> CSV examples
      *
-     * @param pkg        The XLSX package to process
-     * @param output     The PrintStream to output the CSV to
-     * @param minColumns The minimum number of columns to output, or -1 for no minimum
+     * @param pkg The XLSX package to process
      */
-    public XLSX2CSV(OPCPackage pkg, PrintStream output, int minColumns) {
+    public XLSX2Object(OPCPackage pkg, CellValueFormater formater, Class<T> clazz) throws AnnotationException {
         this.xlsxPackage = pkg;
-        this.output = output;
-        this.minColumns = minColumns;
+        this.clazz = clazz;
+        this.formater = formater;
+        buildNameAndField();
     }
 
     /**
-     * Parses and shows the content of one sheet
-     * using the specified styles and shared-strings tables.
+     * Creates a new XLSX -> CSV examples
      *
-     * @param styles           The table of styles that may be referenced by cells in the sheet
-     * @param strings          The table of strings that may be referenced by cells in the sheet
-     * @param sheetInputStream The stream to read the sheet-data from.
-     * @throws java.io.IOException An IO exception from the parser,
-     *                             possibly from a byte stream or character stream
-     *                             supplied by the application.
-     * @throws SAXException        if parsing the XML data fails.
+     * @param pkg The XLSX package to process
+     */
+    public XLSX2Object(OPCPackage pkg, Class<T> clazz) throws AnnotationException {
+        this.xlsxPackage = pkg;
+        this.clazz = clazz;
+        this.formater = new DefaultCellValueFormater();
+        buildNameAndField();
+    }
+
+    /**
+     * 以sheet为维度解析
+     *
+     * @throws SAXException
      */
     public void processSheet(
             Styles styles,
             SharedStrings strings,
             SheetContentsHandler sheetHandler,
             InputStream sheetInputStream) throws IOException, SAXException {
+
         DataFormatter formatter = new DataFormatter();
         InputSource sheetSource = new InputSource(sheetInputStream);
         try {
@@ -183,7 +227,7 @@ public class XLSX2CSV {
             sheetParser.setContentHandler(handler);
             sheetParser.parse(sheetSource);
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException("SAX parser appears to be broken - " + e.getMessage());
+            throw new ExportException("解析器出错了！" + e.getMessage());
         }
     }
 
@@ -198,17 +242,13 @@ public class XLSX2CSV {
         XSSFReader xssfReader = new XSSFReader(this.xlsxPackage);
         StylesTable styles = xssfReader.getStylesTable();
         XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
-        int index = 0;
         while (iter.hasNext()) {
             try (InputStream stream = iter.next()) {
-                String sheetName = iter.getSheetName();
-                this.output.println();
-                this.output.println(sheetName + " [index=" + index + "]:");
                 processSheet(styles, strings, new SheetToCSV(), stream);
             }
-            ++index;
         }
     }
+
 
     public static void main(String[] args) throws Exception {
 
@@ -219,14 +259,17 @@ public class XLSX2CSV {
             return;
         }
 
-        int minColumns = -1;
-
         // The package open is instantaneous, as it should be.
         try (OPCPackage p = OPCPackage.open(xlsxFile.getPath(), PackageAccess.READ)) {
-            XLSX2CSV xlsx2csv = new XLSX2CSV(p, System.out, minColumns);
+            XLSX2Object<Student> xlsx2csv = new XLSX2Object<>(p, Student.class);
             xlsx2csv.process();
+
+            for (Student s : xlsx2csv.getResult()) {
+                System.out.println(s.toString());
+            }
         }
         Long end = System.currentTimeMillis();
         System.out.println("共耗时:" + (end - start));
+
     }
 }

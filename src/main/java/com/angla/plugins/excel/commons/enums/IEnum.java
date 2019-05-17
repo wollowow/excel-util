@@ -6,8 +6,8 @@ package com.angla.plugins.excel.commons.enums;
  * @desc
  **/
 public interface IEnum<Code,Name> {
-    public Code getCode();
+    Code getCode();
 
-    public Name getName();
+    Name getName();
 
 }

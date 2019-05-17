@@ -1,4 +1,4 @@
-package com.angla.plugins.excel.analysis.anno;
+package com.angla.plugins.excel.inventor.anno;
 
 
 import java.lang.annotation.ElementType;
@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface AnalysisClass {
+public @interface InventorClass {
     int maxRow() default Integer.MAX_VALUE;     //最大行数
     int minRow() default 1;                     //最小行数
     int maxColumn() default Integer.MAX_VALUE;  //最大列数

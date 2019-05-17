@@ -1,5 +1,6 @@
 package com.angla.plugins.excel;
 
+import jdk.nashorn.internal.runtime.logging.Logger;
 import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -28,6 +29,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * @author angla
  **/
 public class MyReadOnlySharedStringsTable extends DefaultHandler implements SharedStrings {
+
 
     protected final boolean includePhoneticRuns;
     protected int count;
@@ -111,6 +113,11 @@ public class MyReadOnlySharedStringsTable extends DefaultHandler implements Shar
 
     public RichTextString getItemAt(int idx) {
         return new XSSFRichTextString(this.getEntryAt(idx));
+    }
+
+    public void startDocument() throws SAXException {
+
+        super.startDocument();
     }
 
     public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {

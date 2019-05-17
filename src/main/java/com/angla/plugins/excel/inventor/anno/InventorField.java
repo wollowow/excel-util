@@ -1,4 +1,4 @@
-package com.angla.plugins.excel.analysis.anno;
+package com.angla.plugins.excel.inventor.anno;
 
 
 import java.lang.annotation.ElementType;
@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface AnalysisField {
+public @interface InventorField {
     String  name() default "";                              //中文名字
     boolean required() default false;                       //是否必填
     String regex() default "";                              //自定义正则

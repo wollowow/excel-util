@@ -1,4 +1,4 @@
-package com.angla.plugins.excel.inventor;
+package com.angla.demo.excel;
 
 import com.angla.plugins.excel.inventor.anno.InventorField;
 

@@ -1,13 +1,13 @@
-package com.angla.plugins.excel;
+package com.angla.plugins.excel.inventor.parse;
 
 import com.angla.plugins.excel.commons.throwable.ExcelException;
 import com.angla.plugins.excel.commons.throwable.exception.AnnotationException;
-import com.angla.plugins.excel.inventor.Student;
 import com.angla.plugins.excel.inventor.anno.InventorField;
-import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
 import com.angla.plugins.excel.inventor.format.CellValueFormater;
+import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ooxml.util.SAXHelper;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
@@ -26,7 +26,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -44,7 +43,7 @@ import javax.xml.parsers.ParserConfigurationException;
 /**
  * xlsx转成对象属性值
  */
-public class XLSX2Object<T> {
+public class ExcelX2Object<T> implements Inventor {
     /**
      * Uses the XSSF Event SAX helpers to do most of the work
      * of parsing the Sheet XML, and outputs the contents
@@ -124,6 +123,7 @@ public class XLSX2Object<T> {
                 throw new ExcelException("解析异常!", e);
             }
         }
+
         public void headerFooter(String s, boolean b, String s1) {
         }
     }
@@ -188,7 +188,7 @@ public class XLSX2Object<T> {
      *
      * @param pkg The XLSX package to process
      */
-    public XLSX2Object(OPCPackage pkg, CellValueFormater formater, Class<T> clazz) throws AnnotationException {
+    public ExcelX2Object(OPCPackage pkg, CellValueFormater formater, Class<T> clazz) throws AnnotationException {
         this.xlsxPackage = pkg;
         this.clazz = clazz;
         this.formater = formater;
@@ -200,7 +200,7 @@ public class XLSX2Object<T> {
      *
      * @param pkg The XLSX package to process
      */
-    public XLSX2Object(OPCPackage pkg, Class<T> clazz) throws AnnotationException {
+    public ExcelX2Object(OPCPackage pkg, Class<T> clazz) throws AnnotationException {
         this.xlsxPackage = pkg;
         this.clazz = clazz;
         this.formater = new DefaultCellValueFormater();
@@ -208,11 +208,38 @@ public class XLSX2Object<T> {
     }
 
     /**
+     * Creates a new XLSX -> CSV examples
+     *
+     * @param filePath filepath
+     */
+    public ExcelX2Object(String filePath, Class<T> clazz) throws AnnotationException, InvalidFormatException {
+        OPCPackage pkg = OPCPackage.open(filePath, PackageAccess.READ);
+        this.xlsxPackage = pkg;
+        this.clazz = clazz;
+        this.formater = new DefaultCellValueFormater();
+        buildNameAndField();
+    }
+
+    /**
+     * Creates a new XLSX -> CSV examples
+     *
+     * @param inputStream inputStream
+     */
+    public ExcelX2Object(InputStream inputStream, Class<T> clazz) throws AnnotationException, InvalidFormatException,
+            IOException {
+        this.xlsxPackage = OPCPackage.open(inputStream);
+        this.clazz = clazz;
+        this.formater = new DefaultCellValueFormater();
+        buildNameAndField();
+    }
+
+
+    /**
      * 以sheet为维度解析
      *
      * @throws SAXException
      */
-    public void processSheet(
+    public void parseSheet(
             Styles styles,
             SharedStrings strings,
             SheetContentsHandler sheetHandler,
@@ -237,39 +264,16 @@ public class XLSX2Object<T> {
      * @throws IOException  If reading the data from the package fails.
      * @throws SAXException if parsing the XML data fails.
      */
-    public void process() throws IOException, OpenXML4JException, SAXException {
+    public List<T> parse() throws IOException, OpenXML4JException, SAXException {
         MyReadOnlySharedStringsTable strings = new MyReadOnlySharedStringsTable(this.xlsxPackage);
         XSSFReader xssfReader = new XSSFReader(this.xlsxPackage);
         StylesTable styles = xssfReader.getStylesTable();
         XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
         while (iter.hasNext()) {
             try (InputStream stream = iter.next()) {
-                processSheet(styles, strings, new SheetToCSV(), stream);
+                parseSheet(styles, strings, new SheetToCSV(), stream);
             }
         }
-    }
-
-
-    public static void main(String[] args) throws Exception {
-
-        Long start = System.currentTimeMillis();
-        File xlsxFile = new File("/Users/menghualiu/Desktop/test.xlsx");
-        if (!xlsxFile.exists()) {
-            System.err.println("Not found or not a file: " + xlsxFile.getPath());
-            return;
-        }
-
-        // The package open is instantaneous, as it should be.
-        try (OPCPackage p = OPCPackage.open(xlsxFile.getPath(), PackageAccess.READ)) {
-            XLSX2Object<Student> xlsx2csv = new XLSX2Object<>(p, Student.class);
-            xlsx2csv.process();
-
-            for (Student s : xlsx2csv.getResult()) {
-                System.out.println(s.toString());
-            }
-        }
-        Long end = System.currentTimeMillis();
-        System.out.println("共耗时:" + (end - start));
-
+        return this.result;
     }
 }

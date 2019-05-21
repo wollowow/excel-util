@@ -20,5 +20,4 @@ public @interface InventorField {
     boolean required() default false;                       //是否必填
     String regex() default "";                              //自定义正则
     int[] uniNos() default {};                              //是否唯一， 如果唯一的话 则其默认must
-//    Class transform() default FieldTranform.class;          //定义excel中的转换格式
 }

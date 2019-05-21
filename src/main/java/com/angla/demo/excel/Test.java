@@ -1,17 +1,11 @@
 package com.angla.demo.excel;
 
-import com.angla.plugins.excel.ExcelFactory;
-import com.angla.plugins.excel.export.ExcelExporter;
-import com.angla.plugins.excel.export.Exporter;
-import org.apache.poi.ss.usermodel.Workbook;
+import com.angla.plugins.excel.inventor.parse.ExcelX2Object;
+import com.angla.plugins.excel.inventor.parse.Inventor;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  * Title:Test
@@ -21,23 +15,11 @@ import java.util.List;
 public class Test<T> {
     public static void main(String s[]) throws Exception {
 
-        List<ExportBean> exportBeans = new ArrayList<>();
-        Date current = new Date();
-        for (int i = 0; i < 100; i++) {
+        InputStream inputStream = new FileInputStream(new File("/Users/menghualiu/Desktop/test2.xlsx"));
 
-            ExportBean exportBean = new ExportBean();
-            exportBean.setCreateTime(current);
-            exportBean.setId(Long.parseLong(i+""));
-            exportBean.setMoney(new BigDecimal("2.33"));
-            exportBean.setName("张三");
-            exportBeans.add(exportBean);
-        }
+        Inventor<Student> inventor = new ExcelX2Object<>(inputStream, Student.class);
 
-        Exporter<ExportBean> exporter = ExcelFactory.initExporter(exportBeans);
-        Workbook workbook = exporter.generalExport();
-        OutputStream outputStream = new FileOutputStream(new File("/Users/menghualiu/Desktop/tes.xls"));
+        System.out.println(inventor.parse().size());
 
-        workbook.write(outputStream);
-        outputStream.close();
     }
 }

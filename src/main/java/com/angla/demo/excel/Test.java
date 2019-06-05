@@ -1,9 +1,9 @@
 package com.angla.demo.excel;
 
-import com.angla.plugins.excel.inventor.parse.ExcelX2Object;
+import com.angla.plugins.excel.ExcelFactory;
 import com.angla.plugins.excel.inventor.parse.Inventor;
 
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
@@ -15,11 +15,10 @@ import java.io.InputStream;
 public class Test<T> {
     public static void main(String s[]) throws Exception {
 
-        InputStream inputStream = new FileInputStream(new File("/Users/menghualiu/Desktop/test2.xlsx"));
+        InputStream inputStream = new BufferedInputStream(new FileInputStream("/Users/menghualiu/Desktop/test.xlsx"));
 
-        Inventor<Student> inventor = new ExcelX2Object<>(inputStream, Student.class);
-
-        System.out.println(inventor.parse().size());
+        Inventor<Student> inventor = ExcelFactory.initInventor(inputStream,Student.class);
+        inventor.parse();
 
     }
 }

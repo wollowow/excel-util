@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * Title:Student
  *
- * @author liumenghua
+ * @author angla
  **/
 public class Student1 {
 

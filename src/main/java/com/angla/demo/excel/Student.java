@@ -1,5 +1,6 @@
 package com.angla.demo.excel;
 
+import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
 import com.angla.plugins.excel.inventor.anno.InventorField;
 
 import java.util.Date;
@@ -7,9 +8,9 @@ import java.util.Date;
 /**
  * Title:Student
  *
- * @author liumenghua
+ * @author angla
  **/
-public class Student {
+public class Student extends InventorBeanTemplate {
 
 
     @InventorField(name = "姓名")

@@ -1,16 +1,14 @@
-package com.angla.plugins.excel.inventor.parse;
+package com.angla.plugins.excel.inventor.parse.impl;
 
+import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;
-import com.angla.plugins.excel.commons.throwable.exception.AnnotationException;
-import com.angla.plugins.excel.inventor.anno.InventorField;
-import com.angla.plugins.excel.inventor.format.CellValueFormater;
 import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
+import com.angla.plugins.excel.inventor.parse.AbstractInventor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ooxml.util.SAXHelper;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -33,23 +31,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.server.ExportException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * xlsx转成对象属性值
  */
-public class ExcelX2Object<T> implements Inventor {
+public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInventor<T> {
+
     /**
-     * Uses the XSSF Event SAX helpers to do most of the work
-     * of parsing the Sheet XML, and outputs the contents
-     * as a (basic) CSV.
+     * 解析sheet并转化object
      */
-    private class SheetToCSV implements SheetContentsHandler {
+    private class SheetToObject implements SheetContentsHandler {
 
         private boolean firstCellOfRow;
         private boolean firstRow = true;
@@ -70,17 +63,12 @@ public class ExcelX2Object<T> implements Inventor {
             firstCellOfRow = true;
             currentRow = rowNum;
             currentCol = -1;
-            try {
-                t = clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new ExcelException("生成带转换的类异常!");
-            }
         }
 
         @Override
         public void endRow(int rowNum) {
             if (!firstRow) {
-                result.add(t);
+                getResult().add(t);
                 t = null;
             }
             if (firstRow) {
@@ -114,17 +102,15 @@ public class ExcelX2Object<T> implements Inventor {
                 if (null == field) {
                     return;
                 }
+
                 String methodName =
                         "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
                 Method method = clazz.getMethod(methodName, field.getType());
                 method.setAccessible(true);
-                method.invoke(t, formater.formatValue(formattedValue, field.getGenericType().toString()));
+                method.invoke(t, formater.formatValue(formattedValue.trim(), field.getGenericType().toString()));
             } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | ParseException e) {
                 throw new ExcelException("解析异常!", e);
             }
-        }
-
-        public void headerFooter(String s, boolean b, String s1) {
         }
     }
 
@@ -133,106 +119,16 @@ public class ExcelX2Object<T> implements Inventor {
 
 
     /**
-     * Destination for data
-     */
-    private final List<T> result = new ArrayList<>();
-
-    public List<T> getResult() {
-        return result;
-    }
-
-    private T t;
-
-    /**
-     * 标题
-     */
-    private List<String> titles = new ArrayList<>();
-
-    public List<String> getTitles() {
-        return titles;
-    }
-
-    private CellValueFormater formater;
-
-    private Class<T> clazz;
-
-    /**
-     * 名称和属性关联
-     */
-    private Map<String, Field> name2FieldMap = new HashMap<>();
-
-
-    private void buildNameAndField() throws AnnotationException {
-
-        Field[] fields = clazz.getDeclaredFields();
-
-        for (Field field : fields) {
-            InventorField inventorField = field.getAnnotation(InventorField.class);
-            if (null == inventorField) {
-                continue;
-            }
-            String name = inventorField.name();
-            if ("".equals(name)) {
-                throw new AnnotationException("注解name不能为空");
-            }
-            name2FieldMap.put(name, field);
-        }
-
-        if (CollectionUtils.isEmpty(name2FieldMap.entrySet())) {
-            throw new AnnotationException("需要为转化的属性配置@InventorField注解");
-        }
-    }
-
-    /**
-     * Creates a new XLSX -> CSV examples
+     * OPCPackage
      *
      * @param pkg The XLSX package to process
      */
-    public ExcelX2Object(OPCPackage pkg, CellValueFormater formater, Class<T> clazz) throws AnnotationException {
+    public ExcelXInventor(OPCPackage pkg, Class<T> clazz, CheckRuleEnum checkRuleEnum) throws ExcelException {
+        super(clazz);
         this.xlsxPackage = pkg;
-        this.clazz = clazz;
-        this.formater = formater;
-        buildNameAndField();
+        super.formater = new DefaultCellValueFormater();
+        super.checkRuleEnum = checkRuleEnum;
     }
-
-    /**
-     * Creates a new XLSX -> CSV examples
-     *
-     * @param pkg The XLSX package to process
-     */
-    public ExcelX2Object(OPCPackage pkg, Class<T> clazz) throws AnnotationException {
-        this.xlsxPackage = pkg;
-        this.clazz = clazz;
-        this.formater = new DefaultCellValueFormater();
-        buildNameAndField();
-    }
-
-    /**
-     * Creates a new XLSX -> CSV examples
-     *
-     * @param filePath filepath
-     */
-    public ExcelX2Object(String filePath, Class<T> clazz) throws AnnotationException, InvalidFormatException {
-        OPCPackage pkg = OPCPackage.open(filePath, PackageAccess.READ);
-        this.xlsxPackage = pkg;
-        this.clazz = clazz;
-        this.formater = new DefaultCellValueFormater();
-        buildNameAndField();
-    }
-
-    /**
-     * Creates a new XLSX -> CSV examples
-     *
-     * @param inputStream inputStream
-     */
-    public ExcelX2Object(InputStream inputStream, Class<T> clazz) throws AnnotationException, InvalidFormatException,
-            IOException {
-        this.xlsxPackage = OPCPackage.open(inputStream);
-        this.clazz = clazz;
-        this.formater = new DefaultCellValueFormater();
-        buildNameAndField();
-    }
-
 
     /**
      * 以sheet为维度解析
@@ -259,21 +155,20 @@ public class ExcelX2Object<T> implements Inventor {
     }
 
     /**
-     * Initiates the processing of the XLS workbook file to CSV.
-     *
-     * @throws IOException  If reading the data from the package fails.
-     * @throws SAXException if parsing the XML data fails.
+     * 解析并返回解析结果
      */
-    public List<T> parse() throws IOException, OpenXML4JException, SAXException {
+    public void parse() throws IOException, OpenXML4JException, SAXException {
         MyReadOnlySharedStringsTable strings = new MyReadOnlySharedStringsTable(this.xlsxPackage);
         XSSFReader xssfReader = new XSSFReader(this.xlsxPackage);
         StylesTable styles = xssfReader.getStylesTable();
         XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
         while (iter.hasNext()) {
             try (InputStream stream = iter.next()) {
-                parseSheet(styles, strings, new SheetToCSV(), stream);
+                parseSheet(styles, strings, new SheetToObject(), stream);
             }
         }
-        return this.result;
     }
+
+
+
 }

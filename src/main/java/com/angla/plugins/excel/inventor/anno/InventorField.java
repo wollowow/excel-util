@@ -17,7 +17,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface InventorField {
     String  name() default "";                              //中文名字
-    boolean required() default false;                       //是否必填
-    String regex() default "";                              //自定义正则
-    int[] uniNos() default {};                              //是否唯一， 如果唯一的话 则其默认must
+    boolean required() default false;                       //校验是否必填
+    String regex() default "";                              //自定义正则校验
+    String format() default "";                             //校验日期格式
+    Class<? extends CustomCheckRule> custom() ;             //自定义校验规则
+
 }

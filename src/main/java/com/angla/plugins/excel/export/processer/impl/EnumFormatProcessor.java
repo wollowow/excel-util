@@ -24,7 +24,7 @@ public class EnumFormatProcessor implements ExportAnnoProcessor {
         if (!flag) {
             throw new ParameterException("注解key值必须为Integer类型");
         }
-        Class<ISEnum> enumClass = exportFieldBean.getEnumRule();
+        Class<? extends ISEnum> enumClass = exportFieldBean.getEnumRule();
         if (null == enumClass) {
             throw new AnnotationException("注解需要实现ISEnum接口");
         }
@@ -40,7 +40,7 @@ public class EnumFormatProcessor implements ExportAnnoProcessor {
     }
 
 
-    private ISEnum resolveCustomEnum(Integer value, Class<ISEnum> type) {
+    private ISEnum resolveCustomEnum(Integer value, Class<? extends ISEnum> type) {
 
         for (ISEnum constant : type.getEnumConstants()) {
             if (constant.getCode().equals(value)) {

@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 /**
  * Title:DefaultCellValueFormater
  *
- * @author liumenghua
+ * @author angla
  **/
 public class DefaultCellValueFormater implements CellValueFormater {
 
@@ -32,6 +32,7 @@ public class DefaultCellValueFormater implements CellValueFormater {
             case "class java.lang.String":
                 formatValue = value;
                 break;
+
             case "class java.lang.Integer":
                 formatValue = Integer.parseInt(value);
                 break;
@@ -57,7 +58,6 @@ public class DefaultCellValueFormater implements CellValueFormater {
                 break;
 
             case "class java.util.Date":
-                //todo
                 if (null != dateFormat) {
                     formatValue = dateFormat.parse(value);
                 }

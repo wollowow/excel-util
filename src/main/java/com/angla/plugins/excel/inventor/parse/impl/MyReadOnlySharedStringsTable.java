@@ -1,6 +1,5 @@
-package com.angla.plugins.excel.inventor.parse;
+package com.angla.plugins.excel.inventor.parse.impl;
 
-import jdk.nashorn.internal.runtime.logging.Logger;
 import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;

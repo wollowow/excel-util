@@ -27,8 +27,8 @@ public @interface ExportField {
 
     boolean percent() default false; //百分比输出
 
-    Class enumRule() default ISEnum.class; //注解数据处理
+    Class<? extends ISEnum> enumRule() default ISEnum.class; //注解数据处理
 
-    Class custom() default CustomRule.class; //自定义规则
+    Class<? extends CustomRule> custom() default CustomRule.class; //自定义规则
 
 }

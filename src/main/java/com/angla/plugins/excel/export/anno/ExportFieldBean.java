@@ -26,8 +26,8 @@ public class ExportFieldBean {
     private int scale;
     private String prefix;
     private String suffix;
-    private Class customRule;
-    private Class<ISEnum> enumRule;
+    private Class<? extends CustomRule> customRule;
+    private Class<? extends ISEnum> enumRule;
     private boolean percent;
 
 
@@ -72,7 +72,7 @@ public class ExportFieldBean {
         return suffix;
     }
 
-    public Class getCustomRule() {
+    public Class<? extends CustomRule> getCustomRule() {
         return customRule;
     }
 
@@ -84,7 +84,7 @@ public class ExportFieldBean {
         return percent;
     }
 
-    public Class<ISEnum> getEnumRule() {
+    public Class<? extends ISEnum> getEnumRule() {
         return enumRule;
     }
 

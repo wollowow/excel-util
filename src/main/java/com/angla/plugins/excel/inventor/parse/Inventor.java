@@ -1,14 +1,14 @@
 package com.angla.plugins.excel.inventor.parse;
 
-import java.util.List;
+import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
 
 /**
  * Title:Inventor
  *
- * @author liumenghua
+ * @author angla
  **/
-public interface Inventor<T> {
+public interface Inventor <T extends InventorBeanTemplate>{
 
-    List<T> parse() throws Exception;
+    void parse() throws Exception;
 
 }

@@ -7,7 +7,6 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -125,11 +124,10 @@ public class ExportAnnoManager {
      */
     private String doProcess(List<ExportAnnoProcessor> exportAnnoProcessers, Object value,
                              ExportFieldBean exportFieldBean) throws Exception {
-        Class customRule = exportFieldBean.getCustomRule();
+        Class<? extends CustomRule> customRule = exportFieldBean.getCustomRule();
         //先处理用户自定义规则
         if (null != customRule) {
-            Method ruleMethod = customRule.getMethod("rule", Object.class);
-            value = ruleMethod.invoke(customRule.newInstance(), value);
+            value = customRule.newInstance().rule(value);
         }
         //处理注解规则
         for (ExportAnnoProcessor e : exportAnnoProcessers) {

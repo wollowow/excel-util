@@ -1,12 +1,11 @@
 package com.angla.plugins.excel.inventor.parse;
 
 import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
-import com.angla.plugins.excel.commons.bean.InventoryCheckResult;
+import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;
 import com.angla.plugins.excel.commons.throwable.exception.AnnotationException;
 import com.angla.plugins.excel.inventor.anno.CustomCheckRule;
-import com.angla.plugins.excel.inventor.anno.InventorField;
 import com.angla.plugins.excel.inventor.anno.InventorFieldBean;
 import com.angla.plugins.excel.inventor.format.CellValueFormater;
 import com.angla.plugins.excel.inventor.processer.InventorAnnoProcessor;
@@ -29,19 +28,20 @@ import java.util.Map;
 
 public abstract class AbstractInventor<T extends InventorBeanTemplate> implements Inventor<T>{
 
+    public AbstractInventor() {
+    }
+
     public AbstractInventor(Class<T> clazz) {
-        buildNameAndField();
         try {
             this.clazz = clazz;
             t = clazz.newInstance();
+            buildNameAndField();
         } catch (Exception e) {
             throw new ExcelException("初始化构造器失败：",e);
         }
     }
 
-    private List<T> result;
-
-    private List<T> errResult;
+    private List<T> result = new ArrayList<>();
 
     protected T t;
 
@@ -58,21 +58,10 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
     /**
      * 名称和属性关联
      */
-    protected Map<String, Field> name2FieldMap = new HashMap<>();
-
-    /**
-     * 校验列表
-     */
-    protected List<InventorAnnoProcessor> processors = new ArrayList<>();
-
-    protected InventorFieldBean inventorFieldBean;
+    protected Map<String, InventorFieldBean> name2FieldMap = new HashMap<>();
 
     public List<T> getResult() {
         return result;
-    }
-
-    public List<T> getErrResult() {
-        return errResult;
     }
 
 
@@ -85,31 +74,24 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
         Field[] fields = clazz.getDeclaredFields();
 
         for (Field field : fields) {
-            InventorField inventorField = field.getAnnotation(InventorField.class);
-            if (null == inventorField) {
-                continue;
-            }
-            String name = inventorField.name();
+            InventorFieldBean inventorFieldBean = new InventorFieldBean(field);
+            String name = inventorFieldBean.getName();
             if ("".equals(name)) {
                 throw new AnnotationException("注解name不能为空");
             }
-            name2FieldMap.put(name, field);
-            if(inventorField.required()){
+            List<InventorAnnoProcessor> processors = inventorFieldBean.getProcessors();
+            if(inventorFieldBean.isRequired()){
                 processors.add(new RequiredCheckProcessor());
-                inventorFieldBean.setRequired(true);
             }
-            if (CustomCheckRule.class != inventorField.custom() && CustomCheckRule.class.isAssignableFrom
-                    (inventorField.custom())) {
-                inventorFieldBean.setCustom(inventorField.custom());
-            }
-            if(!"".equals(inventorField.format())){
-                inventorFieldBean.setFormat(inventorField.format());
+            if(!"".equals(inventorFieldBean.getFormat())){
+                inventorFieldBean.setFormat(inventorFieldBean.getFormat());
                 processors.add(new FormatCheckProcessor());
             }
-            if(!"".equals(inventorField.regex())){
-                inventorFieldBean.setRegex(inventorField.regex());
+            if(!"".equals(inventorFieldBean.getRegex())){
+                inventorFieldBean.setRegex(inventorFieldBean.getRegex());
                 processors.add(new RegexCheckProcessor());
             }
+            name2FieldMap.put(name, inventorFieldBean);
         }
         if (CollectionUtils.isEmpty(name2FieldMap.entrySet())) {
             throw new AnnotationException("需要为转化的属性配置@InventorField注解");
@@ -120,31 +102,29 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
      * 校验格式
      * @param value
      * @return
-     * @throws NoSuchMethodException
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    private InventoryCheckResult doProcess(String value) throws NoSuchMethodException, IllegalAccessException,
-            InstantiationException {
+    public InventoryVerifyResult doProcess(String value, InventorFieldBean inventorFieldBean) throws
+            IllegalAccessException, InstantiationException {
 
-        InventoryCheckResult result;
+        InventoryVerifyResult result;
         Class<? extends CustomCheckRule> customRule = inventorFieldBean.getCustom();
         if(null != customRule){
-            result = customRule.newInstance().check(value,inventorFieldBean);
-            if(!result.isChecked()){
+            result = customRule.newInstance().check(value);
+            if(!result.isVerified()){
                 return result;
             }
         }
-        if(CollectionUtils.isEmpty(processors)){
-            return InventoryCheckResult.suc();
+        if(CollectionUtils.isEmpty(inventorFieldBean.getProcessors())){
+            return InventoryVerifyResult.suc();
         }
-
-        for(InventorAnnoProcessor processor: processors){
+        for(InventorAnnoProcessor processor: inventorFieldBean.getProcessors()){
             result = processor.checked(value,inventorFieldBean);
-            if(!result.isChecked()){
+            if(!result.isVerified()){
                 return result;
             }
         }
-        return InventoryCheckResult.suc();
+        return InventoryVerifyResult.suc();
     }
 }

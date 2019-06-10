@@ -20,6 +20,6 @@ public @interface InventorField {
     boolean required() default false;                       //校验是否必填
     String regex() default "";                              //自定义正则校验
     String format() default "";                             //校验日期格式
-    Class<? extends CustomCheckRule> custom() ;             //自定义校验规则
+    Class<? extends CustomCheckRule> custom() default CustomCheckRule.class;             //自定义校验规则
 
 }

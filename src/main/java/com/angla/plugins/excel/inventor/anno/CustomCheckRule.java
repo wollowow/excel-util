@@ -1,6 +1,6 @@
 package com.angla.plugins.excel.inventor.anno;
 
-import com.angla.plugins.excel.commons.bean.InventoryCheckResult;
+import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 
 /**
  * Title:CustomCheckRule
@@ -9,5 +9,5 @@ import com.angla.plugins.excel.commons.bean.InventoryCheckResult;
  **/
 public interface CustomCheckRule {
 
-    InventoryCheckResult check(String value,InventorFieldBean inventorFieldBean);
+    InventoryVerifyResult check(String value);
 }

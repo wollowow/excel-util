@@ -1,8 +1,11 @@
 package com.angla.plugins.excel.inventor.parse.impl;
 
 import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;
+import com.angla.plugins.excel.commons.throwable.exception.CellCheckException;
+import com.angla.plugins.excel.inventor.anno.InventorFieldBean;
 import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
 import com.angla.plugins.excel.inventor.parse.AbstractInventor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,8 +16,6 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.Styles;
 import org.apache.poi.xssf.model.StylesTable;
@@ -26,11 +27,11 @@ import org.xml.sax.XMLReader;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.server.ExportException;
 import java.text.ParseException;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -42,7 +43,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
     /**
      * 解析sheet并转化object
      */
-    private class SheetToObject implements SheetContentsHandler {
+    private class SheetToObject implements MyXSSFSheetXMLHandler.SheetContentsHandler {
 
         private boolean firstCellOfRow;
         private boolean firstRow = true;
@@ -63,13 +64,17 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
             firstCellOfRow = true;
             currentRow = rowNum;
             currentCol = -1;
+            try {
+                t = clazz.newInstance();
+            } catch (Exception e) {
+                throw new ExcelException("解析失败!");
+            }
         }
 
         @Override
         public void endRow(int rowNum) {
             if (!firstRow) {
                 getResult().add(t);
-                t = null;
             }
             if (firstRow) {
                 firstRow = false;
@@ -98,17 +103,28 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
                     throw new ExcelException("未查询到标题行");
                 }
                 String name = titles.get(currentCol);
-                Field field = name2FieldMap.get(name);
+                InventorFieldBean field = name2FieldMap.get(name);
                 if (null == field) {
-                    return;
+                    throw new ParseException("表头错误!",1);
                 }
-
+                InventoryVerifyResult checkResult = doProcess(formattedValue,field);
+                if (!checkResult.isVerified()) {
+                    t.setCorrect(false);
+                    t.appendErrMsg(checkResult.getErrMsg());
+                    if (checkRuleEnum.equals(CheckRuleEnum.BREAK_WHEN_ERROR)) {
+                        throw new CellCheckException("校验失败:" + t.getErrMsg());
+                    } else {
+                        return;
+                    }
+                }
                 String methodName =
-                        "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-                Method method = clazz.getMethod(methodName, field.getType());
+                        "set" + field.getFieldName().substring(0, 1).toUpperCase() + field.getFieldName().substring(1);
+                Method method = clazz.getMethod(methodName, field.getFieldType());
                 method.setAccessible(true);
-                method.invoke(t, formater.formatValue(formattedValue.trim(), field.getGenericType().toString()));
-            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | ParseException e) {
+                method.invoke(t, formater.formatValue(formattedValue.trim(), field.getGeType().toString(),
+                        field.getFormat()));
+            } catch (IllegalAccessException | NoSuchMethodException
+                    | InvocationTargetException | ParseException | InstantiationException e) {
                 throw new ExcelException("解析异常!", e);
             }
         }
@@ -138,15 +154,16 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
     public void parseSheet(
             Styles styles,
             SharedStrings strings,
-            SheetContentsHandler sheetHandler,
+            MyXSSFSheetXMLHandler.SheetContentsHandler sheetHandler,
             InputStream sheetInputStream) throws IOException, SAXException {
 
         DataFormatter formatter = new DataFormatter();
         InputSource sheetSource = new InputSource(sheetInputStream);
         try {
             XMLReader sheetParser = SAXHelper.newXMLReader();
-            ContentHandler handler = new XSSFSheetXMLHandler(
-                    styles, null, strings, sheetHandler, formatter, false);
+            ContentHandler handler = new MyXSSFSheetXMLHandler(
+                    styles, name2FieldMap.size(), strings, sheetHandler, formatter, false);
+
             sheetParser.setContentHandler(handler);
             sheetParser.parse(sheetSource);
         } catch (ParserConfigurationException e) {
@@ -157,7 +174,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
     /**
      * 解析并返回解析结果
      */
-    public void parse() throws IOException, OpenXML4JException, SAXException {
+    public List<T> parse() throws IOException, OpenXML4JException, SAXException {
         MyReadOnlySharedStringsTable strings = new MyReadOnlySharedStringsTable(this.xlsxPackage);
         XSSFReader xssfReader = new XSSFReader(this.xlsxPackage);
         StylesTable styles = xssfReader.getStylesTable();
@@ -167,8 +184,8 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
                 parseSheet(styles, strings, new SheetToObject(), stream);
             }
         }
+        return getResult();
     }
-
 
 
 }

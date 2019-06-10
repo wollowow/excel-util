@@ -1,6 +1,6 @@
 package com.angla.plugins.excel.inventor.processer.impl;
 
-import com.angla.plugins.excel.commons.bean.InventoryCheckResult;
+import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.inventor.anno.InventorFieldBean;
 import com.angla.plugins.excel.inventor.processer.InventorAnnoProcessor;
 
@@ -13,10 +13,10 @@ import com.angla.plugins.excel.inventor.processer.InventorAnnoProcessor;
 public class RegexCheckProcessor implements InventorAnnoProcessor {
 
     @Override
-    public InventoryCheckResult checked(String value, InventorFieldBean inventorFieldBean)  {
+    public InventoryVerifyResult checked(String value, InventorFieldBean inventorFieldBean)  {
         if(value.matches(inventorFieldBean.getRegex())){
-            return InventoryCheckResult.suc();
+            return InventoryVerifyResult.suc();
         }
-        return InventoryCheckResult.fail("正则匹配失败");
+        return InventoryVerifyResult.fail("正则匹配失败");
     }
 }

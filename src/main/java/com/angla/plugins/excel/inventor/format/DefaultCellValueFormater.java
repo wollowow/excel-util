@@ -11,18 +11,11 @@ import java.text.SimpleDateFormat;
  **/
 public class DefaultCellValueFormater implements CellValueFormater {
 
-    private SimpleDateFormat dateFormat;
+    private static final String dateFormat = "yyyy-MM-dd hh:mm:ss";
 
-    public DefaultCellValueFormater(SimpleDateFormat dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    public DefaultCellValueFormater() {
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-    }
 
     @Override
-    public Object formatValue(String value, String type) throws ParseException {
+    public Object formatValue(String value, String type, String format) throws ParseException {
         if (null == value || "".equals(value)) {
             return null;
         }
@@ -58,8 +51,10 @@ public class DefaultCellValueFormater implements CellValueFormater {
                 break;
 
             case "class java.util.Date":
-                if (null != dateFormat) {
-                    formatValue = dateFormat.parse(value);
+                if (null != format && !"".equals(format)) {
+                    formatValue = new SimpleDateFormat(format).parse(value);
+                } else {
+                    formatValue = new SimpleDateFormat(dateFormat).parse(value);
                 }
                 break;
         }

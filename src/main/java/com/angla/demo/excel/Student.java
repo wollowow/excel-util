@@ -13,16 +13,16 @@ import java.util.Date;
 public class Student extends InventorBeanTemplate {
 
 
-    @InventorField(name = "姓名")
+    @InventorField(name = "姓名",required = true)
     private String name;
 
-    @InventorField(name = "年龄")
+    @InventorField(name = "年龄",required = true)
     private Integer age;
 
-    @InventorField(name = "性别")
+    @InventorField(name = "性别",required = true)
     private String sex;
 
-    @InventorField(name = "生日")
+    @InventorField(name = "生日" ,format = "yyyy-MM-dd",required = true)
     private Date birth;
 
     public String getName() {

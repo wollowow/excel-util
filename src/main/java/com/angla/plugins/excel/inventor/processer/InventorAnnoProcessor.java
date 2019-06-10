@@ -1,6 +1,6 @@
 package com.angla.plugins.excel.inventor.processer;
 
-import com.angla.plugins.excel.commons.bean.InventoryCheckResult;
+import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.commons.throwable.exception.ParameterException;
 import com.angla.plugins.excel.inventor.anno.InventorFieldBean;
 
@@ -17,6 +17,6 @@ public interface InventorAnnoProcessor {
      * @return
      * @throws ParameterException
      */
-    InventoryCheckResult checked(String value, InventorFieldBean inventorFieldBean);
+    InventoryVerifyResult checked(String value, InventorFieldBean inventorFieldBean);
 
 }

@@ -9,5 +9,5 @@ import java.text.ParseException;
  **/
 public interface CellValueFormater {
 
-    Object formatValue(String value,String type) throws ParseException;
+    Object formatValue(String value,String type,String format) throws ParseException;
 }

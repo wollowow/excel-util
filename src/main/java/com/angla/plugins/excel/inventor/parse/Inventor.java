@@ -2,6 +2,8 @@ package com.angla.plugins.excel.inventor.parse;
 
 import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
 
+import java.util.List;
+
 /**
  * Title:Inventor
  *
@@ -9,6 +11,6 @@ import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
  **/
 public interface Inventor <T extends InventorBeanTemplate>{
 
-    void parse() throws Exception;
+    List<T> parse() throws Exception;
 
 }

@@ -1,6 +1,10 @@
 package com.angla.plugins.excel.inventor.parse.impl;
 
+import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
 import com.angla.plugins.excel.inventor.parse.AbstractInventor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Title:ExcelInventor
@@ -8,13 +12,17 @@ import com.angla.plugins.excel.inventor.parse.AbstractInventor;
  * @author angla
  **/
 
-public class ExcelInventor<T> extends AbstractInventor {
+public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInventor<T> {
+
 
     public ExcelInventor(Class<T> clazz) {
         super(clazz);
     }
 
-    public void parse() throws Exception {
+    public ExcelInventor() {
+    }
 
+    public List<T> parse() throws Exception {
+        return new ArrayList<>();
     }
 }

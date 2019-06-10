@@ -14,7 +14,6 @@ import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.Styles;
@@ -82,8 +81,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         }
 
         @Override
-        public void cell(String cellReference, String formattedValue,
-                         XSSFComment comment) {
+        public void cell(String cellReference, String formattedValue, XSSFComment comment) {
 
             if (firstRow) {
                 titles.add(formattedValue);
@@ -96,7 +94,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
                 cellReference = new CellAddress(currentRow, currentCol).formatAsString();
             }
 
-            currentCol = (int) (new CellReference(cellReference)).getCol();
+            currentCol = new CellAddress(cellReference).getColumn();
 
             try {
                 if (CollectionUtils.isEmpty(titles)) {
@@ -162,7 +160,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         try {
             XMLReader sheetParser = SAXHelper.newXMLReader();
             ContentHandler handler = new MyXSSFSheetXMLHandler(
-                    styles, name2FieldMap.size(), strings, sheetHandler, formatter, false);
+                    styles, name2FieldMap.size(), strings, sheetHandler, formatter);
 
             sheetParser.setContentHandler(handler);
             sheetParser.parse(sheetSource);

@@ -17,7 +17,8 @@ public class Test<T> {
 
         FileInputStream fileIn = new FileInputStream("/Users/menghualiu/Desktop/test.xlsx");
 
-        Inventor<Student> inventor = ExcelFactory.initInventor(fileIn,Student.class, CheckRuleEnum.CONTINUE_WHEN_ERROR);
+        Inventor<Student2> inventor = ExcelFactory.initInventor(fileIn,Student2.class,
+                CheckRuleEnum.CONTINUE_WHEN_ERROR);
         List list = inventor.parse();
         System.out.println(list.size());
 

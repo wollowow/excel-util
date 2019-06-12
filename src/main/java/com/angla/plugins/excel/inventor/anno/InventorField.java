@@ -1,8 +1,6 @@
 package com.angla.plugins.excel.inventor.anno;
 
 
-import com.angla.plugins.excel.commons.enums.ISEnum;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,9 +23,6 @@ public @interface InventorField {
     String regex() default "";                              //自定义正则校验
 
     String format() default "";                             //校验日期格式
-
-    Class<? extends ISEnum> enumRule() default ISEnum.class; //注解数据处理
-
 
     Class<? extends CustomCheckRule> custom() default CustomCheckRule.class;             //自定义校验规则
 

@@ -1,6 +1,5 @@
 package com.angla.plugins.excel.inventor.anno;
 
-import com.angla.plugins.excel.commons.enums.ISEnum;
 import com.angla.plugins.excel.inventor.processer.InventorAnnoProcessor;
 
 import java.lang.reflect.Field;
@@ -21,7 +20,6 @@ public class InventorFieldBean {
     private boolean required;
     private String regex;
     private String format;
-    private Class<? extends ISEnum> enumRule;
     private Class<? extends CustomCheckRule> custom;
     private Type geType;
     private Class fieldType;
@@ -36,15 +34,9 @@ public class InventorFieldBean {
         this.format = inventorField.format();
         this.geType = field.getGenericType();
         this.fieldType = field.getType();
-        this.enumRule = inventorField.enumRule();
         if (CustomCheckRule.class != inventorField.custom() && CustomCheckRule.class.isAssignableFrom
                 (inventorField.custom())) {
             this.custom = inventorField.custom();
-        }
-
-        if (ISEnum.class != inventorField.enumRule() && ISEnum.class.isAssignableFrom
-                (inventorField.enumRule())) {
-            this.enumRule = inventorField.enumRule();
         }
     }
 

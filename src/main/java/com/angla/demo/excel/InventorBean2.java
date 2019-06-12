@@ -6,23 +6,23 @@ import com.angla.plugins.excel.inventor.anno.InventorField;
 import java.util.Date;
 
 /**
- * Title:Student
+ * Title:InventorBean1
  *
  * @author angla
  **/
-public class Student extends InventorBeanTemplate {
+public class InventorBean2 extends InventorBeanTemplate {
 
 
-    @InventorField(name = "姓名",required = true)
+    @InventorField(name = "姓名",required = true,custom = MyVerifyRule.class)
     private String name;
 
     @InventorField(name = "年龄",required = true)
     private Integer age;
 
-    @InventorField(name = "性别",required = true)
+    @InventorField(name = "性别")
     private String sex;
 
-    @InventorField(name = "生日" ,format = "yyyy-MM-dd",required = true)
+    @InventorField(name = "生日" ,required = true,format = "yyyyMMdd")
     private Date birth;
 
     public String getName() {
@@ -57,12 +57,5 @@ public class Student extends InventorBeanTemplate {
         this.birth = birth;
     }
 
-    public String toString() {
-        return "Student{" +
-                "name='" + name + '\'' +
-                ", age=" + age +
-                ", sex='" + sex + '\'' +
-                ", birth=" + birth +
-                '}';
-    }
+
 }

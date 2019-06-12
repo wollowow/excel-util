@@ -28,7 +28,7 @@ public class TestThread implements Runnable{
         try {
             fileIn = new FileInputStream("/Users/menghualiu/Deskto" +
                     "p/document/test/test"+num+".xlsx");
-            Inventor<Student2> inventor = ExcelFactory.initInventor(fileIn,Student2.class,
+            Inventor<InventorBean2> inventor = ExcelFactory.initInventor(fileIn, InventorBean2.class,
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
             List list = inventor.parse();
             System.out.println(current.getName()+":"+list.size());

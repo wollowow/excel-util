@@ -1,6 +1,5 @@
 package com.angla.demo.excel;
 
-import com.angla.plugins.excel.export.anno.CustomRule;
 import com.angla.plugins.excel.export.anno.ExportField;
 import com.angla.plugins.excel.export.anno.SuperInclude;
 
@@ -32,7 +31,7 @@ public class ExportBean{
     @ExportField(format = "yyyy-MM-dd:HH:mm:ss", name = "支付时间")
     Date payTime;
 
-    @ExportField(name = "金额", percent = true,custom = CustomRule.class)
+    @ExportField(name = "金额", percent = true)
     Double value;
 
     public Long getId() {

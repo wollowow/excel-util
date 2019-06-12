@@ -6,6 +6,7 @@ import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;
 import com.angla.plugins.excel.commons.throwable.exception.CellCheckException;
 import com.angla.plugins.excel.inventor.anno.InventorFieldBean;
+import com.angla.plugins.excel.inventor.format.CellValueFormater;
 import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
 import com.angla.plugins.excel.inventor.parse.AbstractInventor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -141,6 +142,18 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         super(clazz);
         this.xlsxPackage = pkg;
         super.formater = new DefaultCellValueFormater();
+        super.checkRuleEnum = checkRuleEnum;
+    }
+
+    /**
+     * OPCPackage
+     *
+     * @param pkg The XLSX package to process
+     */
+    public ExcelXInventor(OPCPackage pkg, Class<T> clazz, CellValueFormater formater, CheckRuleEnum checkRuleEnum) throws ExcelException {
+        super(clazz);
+        this.xlsxPackage = pkg;
+        super.formater = formater;
         super.checkRuleEnum = checkRuleEnum;
     }
 

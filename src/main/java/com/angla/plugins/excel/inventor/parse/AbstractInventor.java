@@ -76,6 +76,8 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
         for (Field field : fields) {
             InventorFieldBean inventorFieldBean = new InventorFieldBean(field);
             String name = inventorFieldBean.getName();
+            inventorFieldBean.setFieldName(field.getName());
+            inventorFieldBean.setFieldType(field.getType());
             if ("".equals(name)) {
                 throw new AnnotationException("注解name不能为空");
             }
@@ -110,6 +112,7 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
 
         InventoryVerifyResult result;
         Class<? extends CustomCheckRule> customRule = inventorFieldBean.getCustom();
+
         if(null != customRule){
             result = customRule.newInstance().check(value);
             if(!result.isVerified()){

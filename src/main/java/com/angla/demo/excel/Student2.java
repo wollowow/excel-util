@@ -3,6 +3,8 @@ package com.angla.demo.excel;
 import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
 import com.angla.plugins.excel.inventor.anno.InventorField;
 
+import java.util.Date;
+
 /**
  * Title:Student
  *
@@ -20,8 +22,8 @@ public class Student2 extends InventorBeanTemplate {
     @InventorField(name = "性别",required = true)
     private String sex;
 
-    @InventorField(name = "生日" ,required = true)
-    private Boolean birth;
+    @InventorField(name = "生日" ,required = true,format = "yyyyMMdd")
+    private Date birth;
 
     public String getName() {
         return name;
@@ -47,21 +49,13 @@ public class Student2 extends InventorBeanTemplate {
         this.sex = sex;
     }
 
-
-    public Boolean isBirth() {
+    public Date getBirth() {
         return birth;
     }
 
-    public void setBirth(Boolean birth) {
+    public void setBirth(Date birth) {
         this.birth = birth;
     }
 
-    public String toString() {
-        return "Student{" +
-                "name='" + name + '\'' +
-                ", age=" + age +
-                ", sex='" + sex + '\'' +
-                ", birth=" + birth +
-                '}';
-    }
+
 }

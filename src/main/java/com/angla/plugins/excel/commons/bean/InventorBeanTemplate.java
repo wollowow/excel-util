@@ -1,5 +1,7 @@
 package com.angla.plugins.excel.commons.bean;
 
+import com.angla.plugins.excel.export.anno.ExportField;
+
 import java.io.Serializable;
 
 /**
@@ -9,9 +11,11 @@ import java.io.Serializable;
  **/
 public class InventorBeanTemplate implements Serializable {
 
+
     private boolean correct = true;
 
     /*错误信息提示*/
+    @ExportField(name = "错误信息")
     private StringBuilder errMsg = new StringBuilder();
 
     public String getErrMsg() {

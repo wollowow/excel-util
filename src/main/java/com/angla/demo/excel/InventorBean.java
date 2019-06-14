@@ -1,5 +1,8 @@
 package com.angla.demo.excel;
 
+import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.export.anno.ExportField;
+import com.angla.plugins.excel.export.anno.SuperInclude;
 import com.angla.plugins.excel.inventor.anno.InventorField;
 
 import java.util.Date;
@@ -9,19 +12,24 @@ import java.util.Date;
  *
  * @author angla
  **/
-public class InventorBean {
+@SuperInclude
+public class InventorBean extends InventorBeanTemplate {
 
 
-    @InventorField(name = "姓名1")
+    @InventorField(name = "姓名",custom = MyVerifyRule.class)
+    @ExportField(name = "姓名",suffix = "先生")
     private String name;
 
-    @InventorField(name = "年龄1")
+    @InventorField(name = "年龄")
+    @ExportField(name = "年龄",scale = 2)
     private Integer age;
 
-    @InventorField(name = "性别1")
+    @InventorField(name = "性别")
+    @ExportField(name = "性别")
     private String sex;
 
-    @InventorField(name = "生日1")
+    @InventorField(name = "生日",format = "yyyyMMdd")
+    @ExportField(name = "生日",format = "yyyy-MM-dd")
     private Date birth;
 
     public String getName() {

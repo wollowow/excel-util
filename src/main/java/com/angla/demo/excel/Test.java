@@ -19,7 +19,7 @@ public class Test {
         FileInputStream fileIn = null;
         try {
             Long start = System.currentTimeMillis();
-            fileIn = new FileInputStream("/Users/menghualiu/Desktop/document/test/test1.xlsx");
+            fileIn = new FileInputStream("/Users/menghualiu/Desktop/document/test/test2.xlsx");
             Inventor<InventorBean2> inventor = ExcelFactory.initInventor(fileIn, InventorBean2.class,
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
             List list = inventor.parse();

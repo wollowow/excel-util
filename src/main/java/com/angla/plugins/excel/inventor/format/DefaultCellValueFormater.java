@@ -27,15 +27,18 @@ public class DefaultCellValueFormater implements CellValueFormater {
                 break;
 
             case "class java.lang.Integer":
-                formatValue = Integer.parseInt(value);
+                if(value.endsWith(".0")){
+                    value = value.substring(0,value.indexOf("."));
+                }
+                formatValue = Integer.valueOf(value);
                 break;
 
             case "class java.lang.Double":
-                formatValue = Double.parseDouble(value);
+                formatValue = Double.valueOf(value);
                 break;
 
             case "class java.lang.Boolean":
-                formatValue = Boolean.parseBoolean(value);
+                formatValue = Boolean.valueOf(value);
                 break;
 
             case "class java.math.BigDecimal":
@@ -43,11 +46,11 @@ public class DefaultCellValueFormater implements CellValueFormater {
                 break;
 
             case "class java.lang.Long":
-                formatValue = Long.parseLong(value);
+                formatValue = Long.valueOf(value);
                 break;
 
             case "class java.lang.Float":
-                formatValue = Float.parseFloat(value);
+                formatValue = Float.valueOf(value);
                 break;
 
             case "class java.util.Date":

@@ -1,12 +1,12 @@
 package com.angla.demo.excel;
 
 import com.angla.plugins.excel.ExcelFactory;
+import com.angla.plugins.excel.commons.bean.InventorParseResult;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.inventor.parse.Inventor;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.List;
 
 /**
  * Title:TestThread
@@ -30,8 +30,8 @@ public class TestThread implements Runnable{
                     "p/document/test/test"+num+".xlsx");
             Inventor<InventorBean2> inventor = ExcelFactory.initInventor(fileIn, InventorBean2.class,
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
-            List list = inventor.parse();
-            System.out.println(current.getName()+":"+list.size());
+            InventorParseResult inventorParseResult = inventor.parse();
+            System.out.println(current.getName()+":"+inventorParseResult.getSucList().size());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (Exception e) {

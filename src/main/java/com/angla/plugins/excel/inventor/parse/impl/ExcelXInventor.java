@@ -1,6 +1,7 @@
 package com.angla.plugins.excel.inventor.parse.impl;
 
 import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.commons.bean.InventorParseResult;
 import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;
@@ -31,7 +32,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.server.ExportException;
 import java.text.ParseException;
-import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -49,7 +49,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         private boolean firstRow = true;
         private int currentRow = -1;
         private int currentCol = -1;
-
+        private boolean isCheckedRow = true;
 
         private void outputMissingRows(int number) {
             currentRow += number;
@@ -74,7 +74,11 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         @Override
         public void endRow(int rowNum) {
             if (!firstRow) {
-                getResult().add(t);
+                if(isCheckedRow)
+                    sucList.add(t);
+                else
+                    errList.add(t);
+                isCheckedRow = true;
             }
             if (firstRow) {
                 firstRow = false;
@@ -104,10 +108,11 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
                 String name = titles.get(currentCol);
                 InventorFieldBean field = name2FieldMap.get(name);
                 if (null == field) {
-                    throw new ParseException("表头错误!",1);
+                    throw new ParseException("表头错误!", 1);
                 }
-                InventoryVerifyResult checkResult = doProcess(formattedValue,field);
+                InventoryVerifyResult checkResult = doProcess(formattedValue, field);
                 if (!checkResult.isVerified()) {
+                    isCheckedRow = false;
                     t.setCorrect(false);
                     t.appendErrMsg(checkResult.getErrMsg());
                     if (checkRuleEnum.equals(CheckRuleEnum.BREAK_WHEN_ERROR)) {
@@ -185,7 +190,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
     /**
      * 解析并返回解析结果
      */
-    public List<T> parse() throws IOException, OpenXML4JException, SAXException {
+    public InventorParseResult<T> parse() throws IOException, OpenXML4JException, SAXException {
         MyReadOnlySharedStringsTable strings = new MyReadOnlySharedStringsTable(this.xlsxPackage);
         XSSFReader xssfReader = new XSSFReader(this.xlsxPackage);
         StylesTable styles = xssfReader.getStylesTable();
@@ -197,6 +202,8 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         }
         return getResult();
     }
+
+
 
 
 }

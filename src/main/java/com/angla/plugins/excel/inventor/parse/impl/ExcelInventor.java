@@ -1,6 +1,7 @@
 package com.angla.plugins.excel.inventor.parse.impl;
 
 import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.commons.bean.InventorParseResult;
 import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;
@@ -21,7 +22,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
-import java.util.List;
 
 /**
  * Title:ExcelInventor
@@ -38,7 +38,7 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
     private boolean isFirstRow = true;
 
 
-    private final DataFormatter formatter ;
+    private final DataFormatter formatter;
 
     public ExcelInventor(Class<T> clazz, POIFSFileSystem fileSystem, CheckRuleEnum checkRuleEnum) {
         super(clazz);
@@ -58,7 +58,7 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
         this.formatter = new DataFormatter();
     }
 
-    public List<T> parse() throws Exception {
+    public InventorParseResult<T> parse() throws Exception {
         Workbook workbook = new HSSFWorkbook(fileSystem, true);
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             Sheet sheet = workbook.getSheetAt(i);
@@ -88,6 +88,7 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
                 continue;
             }
             t = clazz.newInstance();
+            boolean isCheckedRow = true;
             for (int j = 0; j < row.getLastCellNum(); j++) {
                 Cell cell = row.getCell(j);
                 if (isFirstRow) {
@@ -103,6 +104,7 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
                 String formattedValue = getCellValue(cell);
                 InventoryVerifyResult checkResult = doProcess(formattedValue, field);
                 if (!checkResult.isVerified()) {
+                    isCheckedRow = false;
                     t.setCorrect(false);
                     t.appendErrMsg(checkResult.getErrMsg());
                     if (checkRuleEnum.equals(CheckRuleEnum.BREAK_WHEN_ERROR)) {
@@ -117,8 +119,11 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
                 method.setAccessible(true);
                 method.invoke(t, formater.formatValue(formattedValue.trim(), field.getGeType().toString(),
                         field.getFormat()));
-                getResult().add(t);
             }
+            if (isCheckedRow)
+                sucList.add(t);
+            else
+                errList.add(t);
             if (isFirstRow) {
                 isFirstRow = false;
             }
@@ -139,7 +144,7 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
             return cellValue;
         }
         short formatIndex = cell.getCellStyle().getDataFormat();
-        String formatString =  cell.getCellStyle().getDataFormatString();
+        String formatString = cell.getCellStyle().getDataFormatString();
         switch (cell.getCellType()) {
             case NUMERIC:
                 String n = String.valueOf(cell.getNumericCellValue());

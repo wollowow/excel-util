@@ -17,7 +17,7 @@ import java.io.OutputStream;
 /**
  * Title:TestInventorAndExport
  *
- * @author liumenghua
+ * @author angla
  **/
 public class TestInventorAndExport {
 
@@ -26,7 +26,7 @@ public class TestInventorAndExport {
 
 
         try {
-            File fileIn = new File("/Users/menghualiu/Desktop/document/test/test4.xls");
+            File fileIn = new File("####/test4.xls");
             Inventor<InventorBean> inventor = ExcelFactory.initInventor(fileIn, InventorBean.class,
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
             InventorParseResult inventorParseResult = inventor.parse();

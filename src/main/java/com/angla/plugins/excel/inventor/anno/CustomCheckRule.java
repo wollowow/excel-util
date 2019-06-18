@@ -5,7 +5,7 @@ import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
 /**
  * Title:CustomCheckRule
  *
- * @author liumenghua
+ * @author angla
  **/
 public interface CustomCheckRule {
 

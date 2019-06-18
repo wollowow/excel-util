@@ -10,7 +10,7 @@ import java.io.FileInputStream;
 /**
  * Title:TestThread
  *
- * @author liumenghua
+ * @author angla
  **/
 public class TestThread implements Runnable{
 
@@ -25,8 +25,7 @@ public class TestThread implements Runnable{
         Thread current = Thread.currentThread();
         int num = i%3;
         try {
-            fileIn = new FileInputStream("/Users/menghualiu/Deskto" +
-                    "p/document/test/test"+num+".xlsx");
+            fileIn = new FileInputStream("####"+num+".xlsx");
             Inventor<InventorBean2> inventor = ExcelFactory.initInventor(fileIn, InventorBean2.class,
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
             InventorParseResult inventorParseResult = inventor.parse();

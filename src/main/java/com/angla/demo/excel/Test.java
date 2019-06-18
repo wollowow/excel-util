@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
 /**
  * Title:Test
  *
- * @author liumenghua
+ * @author angla
  **/
 public class Test {
 
@@ -19,7 +19,7 @@ public class Test {
         FileInputStream fileIn = null;
         try {
             Long start = System.currentTimeMillis();
-            fileIn = new FileInputStream("/Users/menghualiu/Desktop/document/test/test4.xls");
+            fileIn = new FileInputStream("####/test4.xls");
             Inventor<InventorBean2> inventor = ExcelFactory.initInventor(fileIn, InventorBean2.class,
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
             InventorParseResult inventorParseResult = inventor.parse();

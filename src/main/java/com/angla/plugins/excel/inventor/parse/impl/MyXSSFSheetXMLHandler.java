@@ -24,7 +24,7 @@ import static org.apache.poi.xssf.usermodel.XSSFRelation.NS_SPREADSHEETML;
 /**
  * Title:MyXSSFSheetXMLHandler
  *
- * @author liumenghua
+ * @author angla
  **/
 public class MyXSSFSheetXMLHandler extends DefaultHandler {
     private static final POILogger logger = POILogFactory.getLogger(MyXSSFSheetXMLHandler.class);

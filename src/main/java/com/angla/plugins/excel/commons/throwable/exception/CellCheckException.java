@@ -5,7 +5,7 @@ import com.angla.plugins.excel.commons.throwable.ExcelException;
 /**
  * Title:CellCheckException
  *
- * @author liumenghua
+ * @author angla
  **/
 public class CellCheckException extends ExcelException {
 

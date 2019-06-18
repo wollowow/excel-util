@@ -6,7 +6,7 @@ import com.angla.plugins.excel.inventor.anno.CustomCheckRule;
 /**
  * Title:MyVerifyRule
  *
- * @author liumenghua
+ * @author angla
  **/
 public class MyVerifyRule implements CustomCheckRule {
 

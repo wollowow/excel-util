@@ -8,12 +8,25 @@ import java.util.List;
 /**
  * Title:InventorParseResult
  *
- * @author liumenghua
+ * @author angla
  **/
 public class InventorParseResult<T> {
 
+    /**
+     * 正确数据列表
+     */
     private List<T> sucList;
+    /**
+     * 错误数据列表
+     */
     private List<T> errList;
+
+    /**
+     * 处理结果 ：
+     *     ALL_SUCCESS(), //全部成功
+     *     ALL_FAIL(), //全部失败
+     *     PARTIAL_FAILURE(); //部分失败
+     */
     private ParseResultEnum parseResultEnum;
 
     public InventorParseResult(List<T> sucList, List<T> errList) {
@@ -27,7 +40,6 @@ public class InventorParseResult<T> {
             this.parseResultEnum = ParseResultEnum.PARTIAL_FAILURE;
         }
     }
-
     public List<T> getSucList() {
         return sucList;
     }

@@ -96,7 +96,8 @@ public class ExcelFactory {
      * @param <T>
      * @return Inventor
      */
-    public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, Class<T> tClass) throws InvalidFormatException, IOException {
+    public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, Class<T> tClass)
+            throws InvalidFormatException, IOException {
         return initInventor(file, tClass, CheckRuleEnum.CONTINUE_WHEN_ERROR);
     }
 
@@ -108,7 +109,8 @@ public class ExcelFactory {
      * @return Inventor
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, Class<T> tClass,
-                                                                            CheckRuleEnum checkRuleEnum) throws InvalidFormatException, IOException {
+                                                                            CheckRuleEnum checkRuleEnum)
+            throws InvalidFormatException, IOException {
 
         String fileHeader = getFileHeader(file);
         if (null == fileHeader || "".equals(fileHeader)) {

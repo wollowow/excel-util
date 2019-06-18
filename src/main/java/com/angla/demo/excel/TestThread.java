@@ -6,7 +6,6 @@ import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.inventor.parse.Inventor;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 /**
  * Title:TestThread
@@ -32,8 +31,6 @@ public class TestThread implements Runnable{
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
             InventorParseResult inventorParseResult = inventor.parse();
             System.out.println(current.getName()+":"+inventorParseResult.getSucList().size());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

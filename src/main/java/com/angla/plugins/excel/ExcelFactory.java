@@ -10,6 +10,7 @@ import com.angla.plugins.excel.export.ExcelExporter;
 import com.angla.plugins.excel.export.ExcelXExporter;
 import com.angla.plugins.excel.export.Exporter;
 import com.angla.plugins.excel.inventor.format.CellValueFormater;
+import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
 import com.angla.plugins.excel.inventor.parse.Inventor;
 import com.angla.plugins.excel.inventor.parse.impl.ExcelInventor;
 import com.angla.plugins.excel.inventor.parse.impl.ExcelXInventor;
@@ -20,6 +21,8 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -188,22 +191,7 @@ public class ExcelFactory {
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(InputStream inputStream, Class<T> tClass,
                                                                             CheckRuleEnum checkRuleEnum) throws IOException {
-        if (null == inputStream) {
-            throw new ExcelEmptyException("空文件流");
-        }
-        Inventor<T> inventor;
-        OPCPackage pkg;
-        POIFSFileSystem fileSystem;
-        try {
-            pkg = OPCPackage.open(inputStream);
-        } catch (NotOfficeXmlFileException e) {
-            fileSystem = new POIFSFileSystem(inputStream);
-            return new ExcelInventor<>(tClass, fileSystem, checkRuleEnum);
-        } catch (Exception e) {
-            throw new ExcelException("文件解析错误");
-        }
-        inventor = new ExcelXInventor<>(pkg, tClass, checkRuleEnum);
-        return inventor;
+       return initInventor(inputStream,tClass,new DefaultCellValueFormater(),checkRuleEnum);
     }
 
     /**
@@ -232,6 +220,8 @@ public class ExcelFactory {
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(InputStream inputStream, Class<T> tClass,
                                                                             CellValueFormater formater,
                                                                             CheckRuleEnum checkRuleEnum) throws IOException {
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (null == inputStream) {
             throw new ExcelEmptyException("空文件流");
         }
@@ -239,9 +229,16 @@ public class ExcelFactory {
         OPCPackage pkg;
         POIFSFileSystem fileSystem;
         try {
-            pkg = OPCPackage.open(inputStream);
+            byte[] buffer = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(buffer)) != -1) {
+                bos.write(buffer, 0, len);
+            }
+            InputStream xlsxStream = new ByteArrayInputStream(bos.toByteArray());
+            pkg = OPCPackage.open(xlsxStream);
         } catch (NotOfficeXmlFileException e) {
-            fileSystem = new POIFSFileSystem(inputStream);
+            InputStream xlsStream = new ByteArrayInputStream(bos.toByteArray());
+            fileSystem = new POIFSFileSystem(xlsStream);
             return new ExcelInventor<>(tClass, fileSystem, formater, checkRuleEnum);
         } catch (Exception e) {
             throw new ExcelException("文件解析错误");

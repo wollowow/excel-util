@@ -19,7 +19,7 @@ public interface Exporter<T> {
 
     /**
      * 直接导出list数据
-     *
+     * 非格式化数据导出
      * @return
      * @throws Exception
      */

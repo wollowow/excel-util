@@ -5,9 +5,6 @@ import com.angla.plugins.excel.commons.throwable.exception.ExcelEmptyException;
 import com.angla.plugins.excel.commons.throwable.exception.ParameterException;
 import com.angla.plugins.excel.export.anno.ExportAnnoManager;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -39,22 +36,7 @@ public class ExcelXExporter<T> extends AbstractExporter<T> {
         List<List<String>> datas = exportAnnoManager.getDatas();
         /**读取excel文档，超过100行写入硬盘防止内存溢出.*/
         Workbook workBook = new SXSSFWorkbook(100);
-        // sheet 对应一个工作页
-        Sheet sheet = workBook.createSheet();
         //创建标题行
-        Row titleRow = sheet.createRow(0);
-        for (int i = 0; i < titles.size(); i++) {
-            Cell titleCell = titleRow.createCell(i);
-            titleCell.setCellValue(titles.get(i));
-        }
-        for (int i = 0; i < datas.size(); i++) {
-            List<String> data = datas.get(i);
-            Row row = sheet.createRow(i + 1);
-            for (int j = 0; j < data.size(); j++) {
-                Cell cell = row.createCell(j);
-                cell.setCellValue(data.get(j));
-            }
-        }
-        return workBook;
+        return buildWorkbook(titles, datas, workBook);
     }
 }

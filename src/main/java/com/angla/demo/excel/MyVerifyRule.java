@@ -12,9 +12,9 @@ public class MyVerifyRule implements CustomCheckRule {
 
     public InventoryVerifyResult check(String value) {
 
-        if(value.startsWith("刘")){
+        if(value.startsWith("a")){
             return InventoryVerifyResult.suc();
         }
-        return InventoryVerifyResult.fail("必须以刘开头");
+        return InventoryVerifyResult.fail("必须以a开头");
     }
 }

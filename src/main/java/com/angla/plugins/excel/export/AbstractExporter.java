@@ -21,16 +21,37 @@ import java.util.List;
  **/
 public abstract class AbstractExporter<T> implements Exporter<T> {
 
+
+    /**
+     * 导出的数据
+     */
     List<T> data;
+
+
+    /**
+     * 表头
+     */
     List<String> columns;
+
+    /**
+     * 导出的文件类型
+     */
     private ExcelTypeEnum excelEnum;
 
-    AbstractExporter(List<T> data, ExcelTypeEnum excelEnum, List<String> columns) {
+    /**
+     * 仅用于导出对象类数据，是否展示错误信息提示，默认不展示
+     */
+    boolean showErrMsg;
+
+
+    AbstractExporter(List<T> data, ExcelTypeEnum excelEnum, List<String> columns,boolean showErrMsg) {
         this.data = data;
         this.excelEnum = excelEnum;
         this.columns = columns;
+        this.showErrMsg = showErrMsg;
     }
 
+    @Override
     public abstract Workbook generalExport() throws Exception;
 
     @Override

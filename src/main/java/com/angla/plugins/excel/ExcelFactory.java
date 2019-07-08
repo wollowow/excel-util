@@ -46,15 +46,15 @@ public class ExcelFactory {
      * @return Exporter
      */
     private static <T> Exporter<T> initExporter(List<T> data, ExcelTypeEnum excelEnum,
-                                                List<String> columns) throws ParameterException {
+                                                List<String> columns, boolean showErrMsg) throws ParameterException {
         if (CollectionUtils.isEmpty(data)) {
             throw new ParameterException("导出数据不能为空");
         }
         if (ExcelTypeEnum.EXCEL_XLS.equals(excelEnum) && data.size() <= ExcelTypeEnum.EXCEL_XLS.getMaxSize()) {
             //数据量超过xls文件格式最大值时用xlsx文件格式进行导出
-            return new ExcelExporter<>(data, columns);
+            return new ExcelExporter<>(data, columns, showErrMsg);
         }
-        return new ExcelXExporter<>(data, columns);
+        return new ExcelXExporter<>(data, columns, showErrMsg);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ExcelFactory {
      * @return Exporter
      */
     public static <T> Exporter<T> initExporter(List<T> data) throws ParameterException {
-        return initExporter(data, null, null);
+        return initExporter(data,false);
     }
 
 
@@ -74,8 +74,8 @@ public class ExcelFactory {
      * @param data 导出数据
      * @return Exporter
      */
-    public static <T> Exporter<T> initExporter(List<T> data, List<String> columns) throws ParameterException {
-        return initExporter(data, null, columns);
+    public static <T> Exporter<T> initExporter(List<T> data, boolean showErrMsg) throws ParameterException {
+        return initExporter(data, null, null, showErrMsg);
     }
 
 
@@ -85,8 +85,32 @@ public class ExcelFactory {
      * @param data 导出数据
      * @return Exporter
      */
-    public static <T> Exporter<T> initExporter(List<T> data, ExcelTypeEnum excelEnum) throws ParameterException {
-        return initExporter(data, excelEnum, null);
+    public static <T> Exporter<T> initExporter(List<T> data, List<String> columns)
+            throws ParameterException {
+        return initExporter(data, null, columns, false);
+    }
+
+    /**
+     * 初始化导出工具
+     *
+     * @param data 导出数据
+     * @return Exporter
+     */
+    public static <T> Exporter<T> initExporter(List<T> data, List<String> columns, boolean showErrMsg)
+            throws ParameterException {
+        return initExporter(data, null, columns, showErrMsg);
+    }
+
+
+    /**
+     * 初始化导出工具
+     *
+     * @param data 导出数据
+     * @return Exporter
+     */
+    public static <T> Exporter<T> initExporter(List<T> data, ExcelTypeEnum excelEnum, boolean showErrMsg)
+            throws ParameterException {
+        return initExporter(data, excelEnum, null, showErrMsg);
     }
 
 
@@ -119,7 +143,7 @@ public class ExcelFactory {
         Inventor<T> inventor;
         if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLS.getFileHeader())) {
             POIFSFileSystem fileSystem = new POIFSFileSystem(file);
-            inventor = new ExcelInventor<>(tClass,fileSystem,checkRuleEnum);
+            inventor = new ExcelInventor<>(tClass, fileSystem, checkRuleEnum);
         } else if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLSX.getFileHeader())) {
             OPCPackage pkg = OPCPackage.open(file, PackageAccess.READ);
             inventor = new ExcelXInventor<>(pkg, tClass, checkRuleEnum);
@@ -159,7 +183,7 @@ public class ExcelFactory {
         Inventor<T> inventor;
         if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLS.getFileHeader())) {
             POIFSFileSystem fileSystem = new POIFSFileSystem(file);
-            inventor = new ExcelInventor<>(tClass,fileSystem,formater,checkRuleEnum);
+            inventor = new ExcelInventor<>(tClass, fileSystem, formater, checkRuleEnum);
         } else if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLSX.getFileHeader())) {
             OPCPackage pkg = OPCPackage.open(file, PackageAccess.READ);
             inventor = new ExcelXInventor<>(pkg, tClass, formater, checkRuleEnum);
@@ -193,7 +217,7 @@ public class ExcelFactory {
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(InputStream inputStream, Class<T> tClass,
                                                                             CheckRuleEnum checkRuleEnum) throws IOException {
-       return initInventor(inputStream,tClass,new DefaultCellValueFormater(),checkRuleEnum);
+        return initInventor(inputStream, tClass, new DefaultCellValueFormater(), checkRuleEnum);
     }
 
     /**

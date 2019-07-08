@@ -9,6 +9,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,13 +25,16 @@ public class ExportAnnoManager {
 
     private List<String> titles = new ArrayList<>();
     private List<List<String>> datas = new ArrayList<>();
-    private List<String> columns = new ArrayList<>();
+    private List<String> columns;
+    private boolean showErrMsg;
 
-    public ExportAnnoManager init(List datas, Class tclass, List<String> columns) throws Exception {
+
+    public  ExportAnnoManager(List datas, Class tclass, List<String> columns, boolean showErrMsg)
+            throws Exception {
+        this.showErrMsg = showErrMsg;
         this.columns = columns;
         loadTitles(tclass, columns);
         loadData(datas, tclass);
-        return this;
     }
 
     public List<List<String>> getDatas() {
@@ -39,10 +43,6 @@ public class ExportAnnoManager {
 
     public List<String> getTitles() {
         return titles;
-    }
-
-    public List<String> getColumns() {
-        return columns;
     }
 
     /**
@@ -66,6 +66,10 @@ public class ExportAnnoManager {
                 continue;
             }
             if (!CollectionUtils.isEmpty(columns) && !columns.contains(fieldName)) {  //按照给定list进行导出
+                continue;
+            }
+            //不展示错误提示信息
+            if (!showErrMsg && fieldName.equals("errMsg")) {
                 continue;
             }
             String name = "".equals(exportField.name()) ? fieldName : exportField.name();
@@ -97,6 +101,10 @@ public class ExportAnnoManager {
             for (Field field : fieldList) {
                 String fieldName = field.getName();
                 if (!CollectionUtils.isEmpty(columns) && !columns.contains(fieldName)) {
+                    continue;
+                }
+                //不展示错误提示信息
+                if (!showErrMsg && fieldName.equals("errMsg")) {
                     continue;
                 }
                 ExportField exportField = field.getAnnotation(ExportField.class);
@@ -168,15 +176,16 @@ public class ExportAnnoManager {
      * @return
      */
     private List<Field> buildExportFields(List<String> columns, Field[] fields) {
-        List<Field> fieldList = new ArrayList<>();
+        List<Field> fieldList = new ArrayList<>(fields.length);
         //不配置columns时返回所有属性，按默认排序
         if (CollectionUtils.isEmpty(columns)) {
-            return Arrays.asList(fields);
-        }
-        for (String column : columns) {
-            for (Field field : fields) {
-                if (field.getName().equals(column)) {
-                    fieldList.add(field);
+            Collections.addAll(fieldList, fields);
+        } else {
+            for (String column : columns) {
+                for (Field field : fields) {
+                    if (field.getName().equals(column)) {
+                        fieldList.add(field);
+                    }
                 }
             }
         }

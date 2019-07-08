@@ -26,12 +26,19 @@ public class TestInventorAndExport {
 
 
         try {
-            File fileIn = new File("####/test4.xls");
+            File fileIn = new File("/Users/menghualiu/Desktop/document/test/test2.xlsx");
             Inventor<InventorBean> inventor = ExcelFactory.initInventor(fileIn, InventorBean.class,
                     CheckRuleEnum.CONTINUE_WHEN_ERROR);
             InventorParseResult inventorParseResult = inventor.parse();
             if (CollectionUtils.isNotEmpty(inventorParseResult.getErrList())) {
-                Exporter<InventorBean> exporter = ExcelFactory.initExporter(inventorParseResult.getErrList());
+                Exporter<InventorBean> exporter = ExcelFactory.initExporter(inventorParseResult.getErrList(),true);
+                Workbook workbook = exporter.generalExport();
+                OutputStream outputStream = new FileOutputStream(new File("/Users/menghualiu/Desktop/test.xlsx"));
+                workbook.write(outputStream);
+                outputStream.flush();
+                outputStream.close();
+            }else {
+                Exporter<InventorBean> exporter = ExcelFactory.initExporter(inventorParseResult.getSucList());
                 Workbook workbook = exporter.generalExport();
                 OutputStream outputStream = new FileOutputStream(new File("/Users/menghualiu/Desktop/test.xlsx"));
                 workbook.write(outputStream);

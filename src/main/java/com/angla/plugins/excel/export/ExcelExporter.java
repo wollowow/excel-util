@@ -19,26 +19,22 @@ import java.util.List;
 public class ExcelExporter<T> extends AbstractExporter<T> {
 
 
-    public ExcelExporter(List<T> data, List<String> columns) {
-        super(data, ExcelTypeEnum.EXCEL_XLS, columns);
+    public ExcelExporter(List<T> data, List<String> columns, boolean showErrMsg) {
+        super(data, ExcelTypeEnum.EXCEL_XLS, columns, showErrMsg);
     }
 
+    @Override
     public Workbook generalExport() throws Exception {
         if (null == data) {
             throw new ParameterException("传入参数错误");
         }
-        List<T> list =  data;
+        List<T> list = data;
         if (CollectionUtils.isEmpty(list)) {
             throw new ExcelEmptyException("导出数据为空！");
         }
-        Class tClass = data.get(0).getClass();
-        ExportAnnoManager exportAnnoManager = new ExportAnnoManager();
-        exportAnnoManager.init(list, tClass, columns);
-        List<String> titles = exportAnnoManager.getTitles();
-        List<List<String>> datas = exportAnnoManager.getDatas();
+        ExportAnnoManager exportAnnoManager = new ExportAnnoManager(list, data.get(0).getClass(), columns, showErrMsg);
         HSSFWorkbook workBook = new HSSFWorkbook();
-        //创建标题行
-        return buildWorkbook(titles, datas, workBook);
+        return buildWorkbook(exportAnnoManager.getTitles(), exportAnnoManager.getDatas(), workBook);
     }
 
 }

@@ -154,6 +154,8 @@ columns | List<String> | 否 |需要导出的属性名称，不传的情况下�
 2）数据量较大时建议用ExcelEnum.EXCEL_2007的方式进行导出，可以防止内存溢出问题,数据量超过xls最大数据条数（65536）时
 会强制按照ExcelEnum.EXCEL_2007方式导出。生成文件的后缀名可通过exporter.getExcelEnum().getSuffix();获取
 
+3）导出注解的percent参数使用时会在原有的数字基础上乘以100，因此如果记录的数字是百分数的数字部分则不能使用该参数。可以用suffix="%"来添加百分号
+
 ----
 用法可参考com.angla.demo.excel
 

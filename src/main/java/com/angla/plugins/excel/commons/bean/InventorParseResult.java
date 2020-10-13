@@ -17,7 +17,7 @@ public class InventorParseResult<T> {
      */
     private List<T> sucList;
     /**
-     * 错误数据列表
+     * 格式错误数据列表
      */
     private List<List<String>> errList;
 
@@ -60,7 +60,6 @@ public class InventorParseResult<T> {
     public List<String> getTitles() {
         return titles;
     }
-
     public ParseResultEnum getParseResultEnum() {
         return parseResultEnum;
     }

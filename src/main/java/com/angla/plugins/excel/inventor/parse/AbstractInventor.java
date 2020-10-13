@@ -16,7 +16,6 @@ import com.angla.plugins.excel.inventor.processer.impl.RequiredCheckProcessor;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +47,7 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
     /**
      * 标题
      */
-    protected List<String> titles = new ArrayList<>();
+    protected List<String> titles = new LinkedList<>();
 
     protected CellValueFormater formater;
 
@@ -62,7 +61,7 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
 
     protected List<T> sucList = new LinkedList<>();
 
-    protected List<T> errList = new LinkedList<>();
+    protected List<List<String>> errList = new LinkedList<>();
 
     /**
      * 构建名称和属性关联的map
@@ -134,6 +133,6 @@ public abstract class AbstractInventor<T extends InventorBeanTemplate> implement
 
 
     protected InventorParseResult<T> getResult() {
-        return new InventorParseResult<>(sucList, errList);
+        return new InventorParseResult<>(sucList, errList, titles);
     }
 }

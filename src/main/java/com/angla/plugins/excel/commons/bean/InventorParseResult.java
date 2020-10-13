@@ -19,33 +19,46 @@ public class InventorParseResult<T> {
     /**
      * 错误数据列表
      */
-    private List<T> errList;
+    private List<List<String>> errList;
+
+    /**
+     * 标题行
+     */
+    private List<String> titles;
 
     /**
      * 处理结果 ：
-     *     ALL_SUCCESS(), //全部成功
-     *     ALL_FAIL(), //全部失败
-     *     PARTIAL_FAILURE(); //部分失败
+     * ALL_SUCCESS(), //全部成功
+     * ALL_FAIL(), //全部失败
+     * PARTIAL_FAILURE(); //部分失败
      */
     private ParseResultEnum parseResultEnum;
 
-    public InventorParseResult(List<T> sucList, List<T> errList) {
+    public InventorParseResult(List<T> sucList, List<List<String>> errList, List<String> titles) {
+        this.titles = titles;
         this.errList = errList;
         this.sucList = sucList;
         if (CollectionUtils.isEmpty(errList)) {
             this.parseResultEnum = ParseResultEnum.ALL_SUCCESS;
         } else if (CollectionUtils.isEmpty(sucList)) {
+            titles.add(0, "错误信息");
             this.parseResultEnum = ParseResultEnum.ALL_FAIL;
         } else {
+            titles.add(0, "错误信息");
             this.parseResultEnum = ParseResultEnum.PARTIAL_FAILURE;
         }
     }
+
     public List<T> getSucList() {
         return sucList;
     }
 
-    public List<T> getErrList() {
+    public List<List<String>> getErrList() {
         return errList;
+    }
+
+    public List<String> getTitles() {
+        return titles;
     }
 
     public ParseResultEnum getParseResultEnum() {

@@ -32,6 +32,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.server.ExportException;
 import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -55,6 +57,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
             currentRow += number;
         }
 
+        List<String> values;
 
         @Override
         public void startRow(int rowNum) {
@@ -69,15 +72,18 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
             } catch (Exception e) {
                 throw new ExcelException("解析失败!");
             }
+            values = new LinkedList<>();
         }
 
         @Override
         public void endRow(int rowNum) {
             if (!firstRow) {
-                if(isCheckedRow)
+                values.add(0, t.getErrMsg());
+                if (isCheckedRow) {
                     sucList.add(t);
-                else
-                    errList.add(t);
+                } else {
+                    errList.add(values);
+                }
                 isCheckedRow = true;
             }
             if (firstRow) {
@@ -92,6 +98,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
                 titles.add(formattedValue);
                 return;
             }
+            values.add(formattedValue);
             if (firstCellOfRow) {
                 firstCellOfRow = false;
             }
@@ -202,8 +209,4 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         }
         return getResult();
     }
-
-
-
-
 }

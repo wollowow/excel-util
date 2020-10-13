@@ -22,6 +22,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Title:ExcelInventor
@@ -29,7 +31,6 @@ import java.text.ParseException;
  *
  * @author angla
  **/
-
 public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInventor<T> {
 
 
@@ -89,6 +90,7 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
             }
             t = clazz.newInstance();
             boolean isCheckedRow = true;
+            List<String> values = new ArrayList<>();
             for (int j = 0; j < row.getLastCellNum(); j++) {
                 Cell cell = row.getCell(j);
                 if (isFirstRow) {
@@ -102,6 +104,7 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
                 InventorFieldBean field = name2FieldMap.get(name);
 
                 String formattedValue = getCellValue(cell);
+                values.add(formattedValue);
                 InventoryVerifyResult checkResult = doProcess(formattedValue, field);
                 if (!checkResult.isVerified()) {
                     isCheckedRow = false;
@@ -120,10 +123,12 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
                 method.invoke(t, formater.formatValue(formattedValue.trim(), field.getGeType().toString(),
                         field.getFormat()));
             }
-            if (isCheckedRow)
+            values.add(0, t.getErrMsg());
+            if (isCheckedRow) {
                 sucList.add(t);
-            else
-                errList.add(t);
+            } else {
+                errList.add(values);
+            }
             if (isFirstRow) {
                 isFirstRow = false;
             }

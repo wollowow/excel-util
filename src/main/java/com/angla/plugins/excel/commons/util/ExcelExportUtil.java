@@ -52,6 +52,7 @@ public class ExcelExportUtil {
                 fields = fieldList.toArray(result);
             }
             for (Field field : fields) {
+                field.setAccessible(true);
                 Object value = field.get(t);
                 line.add(value.toString());
                 lines.add(line);

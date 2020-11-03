@@ -38,13 +38,12 @@ public class InventorParseResult<T> {
         this.titles = titles;
         this.errList = errList;
         this.sucList = sucList;
+        titles.add(0, "错误信息");
         if (CollectionUtils.isEmpty(errList)) {
             this.parseResultEnum = ParseResultEnum.ALL_SUCCESS;
         } else if (CollectionUtils.isEmpty(sucList)) {
-            titles.add(0, "错误信息");
             this.parseResultEnum = ParseResultEnum.ALL_FAIL;
         } else {
-            titles.add(0, "错误信息");
             this.parseResultEnum = ParseResultEnum.PARTIAL_FAILURE;
         }
     }

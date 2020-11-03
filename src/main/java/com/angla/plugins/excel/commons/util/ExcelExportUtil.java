@@ -1,5 +1,6 @@
 package com.angla.plugins.excel.commons.util;
 
+import com.angla.plugins.excel.export.anno.ExportField;
 import com.angla.plugins.excel.export.anno.SuperInclude;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -53,10 +54,14 @@ public class ExcelExportUtil {
             }
             for (Field field : fields) {
                 field.setAccessible(true);
+                ExportField exportField = field.getAnnotation(ExportField.class);
+                if (null == exportField) {
+                    continue;
+                }
                 Object value = field.get(t);
                 line.add(value.toString());
-                lines.add(line);
             }
+            lines.add(line);
         }
         return lines;
     }

@@ -1,6 +1,6 @@
 package com.angla.demo.excel;
 
-import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.inventor.bean.InventorBeanTemplate;
 import com.angla.plugins.excel.inventor.anno.InventorField;
 
 import java.util.Date;

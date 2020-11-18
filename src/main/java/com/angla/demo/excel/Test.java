@@ -1,7 +1,7 @@
 package com.angla.demo.excel;
 
 import com.angla.plugins.excel.ExcelFactory;
-import com.angla.plugins.excel.commons.bean.InventorParseResult;
+import com.angla.plugins.excel.inventor.bean.InventorParseResult;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.inventor.parse.Inventor;
 

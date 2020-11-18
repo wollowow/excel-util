@@ -1,6 +1,6 @@
 package com.angla.demo.excel;
 
-import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
+import com.angla.plugins.excel.inventor.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.inventor.anno.CustomCheckRule;
 
 /**

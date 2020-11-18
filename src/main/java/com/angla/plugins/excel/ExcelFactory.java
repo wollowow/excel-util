@@ -1,6 +1,6 @@
 package com.angla.plugins.excel;
 
-import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.inventor.bean.InventorBeanTemplate;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.enums.ExcelTypeEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;

@@ -1,6 +1,6 @@
 package com.angla.plugins.excel.inventor.processer;
 
-import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
+import com.angla.plugins.excel.inventor.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.commons.throwable.exception.ParameterException;
 import com.angla.plugins.excel.inventor.anno.InventorFieldBean;
 

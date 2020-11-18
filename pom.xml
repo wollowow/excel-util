@@ -6,7 +6,7 @@
 
     <groupId>com.angla</groupId>
     <artifactId>excel-util</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <build>
         <plugins>
             <plugin>
@@ -42,4 +42,14 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>rdc-releases</id>
+            <url>https://repo.rdc.aliyun.com/repository/104318-release-NGFczH/</url>
+        </repository>
+        <snapshotRepository>
+            <id>rdc-snapshots</id>
+            <url>https://repo.rdc.aliyun.com/repository/104318-snapshot-dIOHW4/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

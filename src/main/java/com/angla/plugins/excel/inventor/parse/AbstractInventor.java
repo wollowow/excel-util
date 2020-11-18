@@ -1,8 +1,8 @@
 package com.angla.plugins.excel.inventor.parse;
 
-import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
-import com.angla.plugins.excel.commons.bean.InventorParseResult;
-import com.angla.plugins.excel.commons.bean.InventoryVerifyResult;
+import com.angla.plugins.excel.inventor.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.inventor.bean.InventorParseResult;
+import com.angla.plugins.excel.inventor.bean.InventoryVerifyResult;
 import com.angla.plugins.excel.commons.enums.CheckRuleEnum;
 import com.angla.plugins.excel.commons.throwable.ExcelException;
 import com.angla.plugins.excel.commons.throwable.exception.AnnotationException;

@@ -1,4 +1,4 @@
-package com.angla.plugins.excel.commons.bean;
+package com.angla.plugins.excel.inventor.bean;
 
 import com.angla.plugins.excel.commons.enums.ParseResultEnum;
 import org.apache.commons.collections4.CollectionUtils;

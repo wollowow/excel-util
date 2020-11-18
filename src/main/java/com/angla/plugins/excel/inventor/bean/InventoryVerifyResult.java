@@ -1,4 +1,4 @@
-package com.angla.plugins.excel.commons.bean;
+package com.angla.plugins.excel.inventor.bean;
 
 /**
  * Title:InventoryVerifyResult

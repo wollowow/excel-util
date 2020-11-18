@@ -1,7 +1,7 @@
 package com.angla.plugins.excel.inventor.parse;
 
-import com.angla.plugins.excel.commons.bean.InventorBeanTemplate;
-import com.angla.plugins.excel.commons.bean.InventorParseResult;
+import com.angla.plugins.excel.inventor.bean.InventorBeanTemplate;
+import com.angla.plugins.excel.inventor.bean.InventorParseResult;
 
 /**
  * Title:Inventor

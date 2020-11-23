@@ -10,6 +10,7 @@ import com.angla.plugins.excel.inventor.anno.InventorFieldBean;
 import com.angla.plugins.excel.inventor.format.CellValueFormater;
 import com.angla.plugins.excel.inventor.format.DefaultCellValueFormater;
 import com.angla.plugins.excel.inventor.parse.AbstractInventor;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -93,7 +94,7 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
 
         @Override
         public void cell(String cellReference, String formattedValue, XSSFComment comment) {
-
+            formattedValue = null == formattedValue ? "" : formattedValue;
             if (firstRow) {
                 titles.add(formattedValue);
                 return;

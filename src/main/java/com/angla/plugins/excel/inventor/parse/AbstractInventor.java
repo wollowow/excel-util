@@ -29,6 +29,10 @@ import java.util.Map;
 
 public abstract class AbstractInventor<T extends InventorBeanTemplate> implements Inventor<T> {
 
+    //需要解析的sheet页，如果小于0则遍历所有的sheet
+    protected int sheetIndex = -1;
+
+
     public AbstractInventor() {
     }
 

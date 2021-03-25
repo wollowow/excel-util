@@ -41,29 +41,27 @@ public class ExcelInventor<T extends InventorBeanTemplate> extends AbstractInven
 
     private final DataFormatter formatter;
 
-    public ExcelInventor(Class<T> clazz, POIFSFileSystem fileSystem, CheckRuleEnum checkRuleEnum) {
-        super(clazz);
-        super.formater = new DefaultCellValueFormater();
-        super.checkRuleEnum = checkRuleEnum;
-        this.fileSystem = fileSystem;
-        this.formatter = new DataFormatter();
-
-    }
-
     public ExcelInventor(Class<T> clazz, POIFSFileSystem fileSystem, CellValueFormater formater,
-                         CheckRuleEnum checkRuleEnum) {
+                         CheckRuleEnum checkRuleEnum,int sheetIndex) {
         super(clazz);
         super.formater = formater;
         super.checkRuleEnum = checkRuleEnum;
+        super.sheetIndex = sheetIndex;
         this.fileSystem = fileSystem;
         this.formatter = new DataFormatter();
     }
 
     public InventorParseResult<T> parse() throws Exception {
         Workbook workbook = new HSSFWorkbook(fileSystem, true);
-        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            Sheet sheet = workbook.getSheetAt(i);
-            parseSheet(sheet);
+        if(sheetIndex < 0){
+            for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+                Sheet sheet = workbook.getSheetAt(i);
+                parseSheet(sheet);
+            }
+        }else {
+            if(sheetIndex < workbook.getNumberOfSheets()){
+                parseSheet(workbook.getSheetAt(sheetIndex));
+            }
         }
         return getResult();
     }

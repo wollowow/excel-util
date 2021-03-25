@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -64,7 +65,7 @@ public class ExcelFactory {
      * @return Exporter
      */
     public static <T> Exporter<T> initExporter(List<T> data) throws ParameterException {
-        return initExporter(data,false);
+        return initExporter(data, false);
     }
 
 
@@ -121,7 +122,7 @@ public class ExcelFactory {
      * @return Inventor
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, Class<T> tClass)
-            throws InvalidFormatException, IOException {
+            throws IOException {
         return initInventor(file, tClass, CheckRuleEnum.CONTINUE_WHEN_ERROR);
     }
 
@@ -134,23 +135,9 @@ public class ExcelFactory {
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, Class<T> tClass,
                                                                             CheckRuleEnum checkRuleEnum)
-            throws InvalidFormatException, IOException {
+            throws IOException {
 
-        String fileHeader = getFileHeader(file);
-        if (null == fileHeader || "".equals(fileHeader)) {
-            throw new ExcelException("未知文件类型");
-        }
-        Inventor<T> inventor;
-        if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLS.getFileHeader())) {
-            POIFSFileSystem fileSystem = new POIFSFileSystem(file);
-            inventor = new ExcelInventor<>(tClass, fileSystem, checkRuleEnum);
-        } else if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLSX.getFileHeader())) {
-            OPCPackage pkg = OPCPackage.open(file, PackageAccess.READ);
-            inventor = new ExcelXInventor<>(pkg, tClass, checkRuleEnum);
-        } else {
-            throw new ExcelException("错误的文件类型");
-        }
-        return inventor;
+        return initInventor(file, tClass, new DefaultCellValueFormater(), checkRuleEnum);
     }
 
 
@@ -161,7 +148,7 @@ public class ExcelFactory {
      * @return Inventor
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, CellValueFormater formater,
-                                                                            Class<T> tClass) throws InvalidFormatException, IOException {
+                                                                            Class<T> tClass) throws IOException {
         return initInventor(file, tClass, formater, CheckRuleEnum.CONTINUE_WHEN_ERROR);
     }
 
@@ -174,23 +161,44 @@ public class ExcelFactory {
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, Class<T> tClass,
                                                                             CellValueFormater formater,
-                                                                            CheckRuleEnum checkRuleEnum) throws InvalidFormatException, IOException {
+                                                                            CheckRuleEnum checkRuleEnum
+    ) throws IOException {
+        return initInventor(file, tClass, formater, checkRuleEnum, -1);
 
+    }
+
+    /**
+     * 初始化导入工具
+     *
+     * @param <T>
+     * @return Inventor
+     */
+    public static <T extends InventorBeanTemplate> Inventor<T> initInventor(File file, Class<T> tClass,
+                                                                            CellValueFormater formater,
+                                                                            CheckRuleEnum checkRuleEnum,
+                                                                            int sheetIndex) throws IOException {
         String fileHeader = getFileHeader(file);
         if (null == fileHeader || "".equals(fileHeader)) {
             throw new ExcelException("未知文件类型");
         }
-        Inventor<T> inventor;
-        if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLS.getFileHeader())) {
-            POIFSFileSystem fileSystem = new POIFSFileSystem(file);
-            inventor = new ExcelInventor<>(tClass, fileSystem, formater, checkRuleEnum);
-        } else if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLSX.getFileHeader())) {
-            OPCPackage pkg = OPCPackage.open(file, PackageAccess.READ);
-            inventor = new ExcelXInventor<>(pkg, tClass, formater, checkRuleEnum);
-        } else {
-            throw new ExcelException("错误的文件类型");
-        }
-        return inventor;
+        InputStream inputStream = new FileInputStream(file);
+        return initInventor(inputStream, tClass, formater, checkRuleEnum, sheetIndex);
+    }
+
+
+    /**
+     * 初始化导入工具
+     *
+     * @param inputStream
+     * @param tClass
+     * @param <T>
+     * @return
+     */
+    public static <T extends InventorBeanTemplate> Inventor<T> initInventor(InputStream inputStream, Class<T> tClass,
+                                                                            int sheetIndex)
+            throws IOException {
+        return initInventor(inputStream, tClass, new DefaultCellValueFormater(), CheckRuleEnum.CONTINUE_WHEN_ERROR,
+                sheetIndex);
     }
 
     /**
@@ -217,7 +225,7 @@ public class ExcelFactory {
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(InputStream inputStream, Class<T> tClass,
                                                                             CheckRuleEnum checkRuleEnum) throws IOException {
-        return initInventor(inputStream, tClass, new DefaultCellValueFormater(), checkRuleEnum);
+        return initInventor(inputStream, tClass, new DefaultCellValueFormater(), checkRuleEnum, -1);
     }
 
     /**
@@ -231,7 +239,7 @@ public class ExcelFactory {
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(InputStream inputStream,
                                                                             CellValueFormater formater,
                                                                             Class<T> tClass) throws IOException {
-        return initInventor(inputStream, tClass, formater, CheckRuleEnum.CONTINUE_WHEN_ERROR);
+        return initInventor(inputStream, tClass, formater, CheckRuleEnum.CONTINUE_WHEN_ERROR, -1);
     }
 
     /**
@@ -245,31 +253,32 @@ public class ExcelFactory {
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(InputStream inputStream, Class<T> tClass,
                                                                             CellValueFormater formater,
-                                                                            CheckRuleEnum checkRuleEnum) throws IOException {
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                                                            CheckRuleEnum checkRuleEnum,
+                                                                            int sheetIndex) throws IOException {
         if (null == inputStream) {
             throw new ExcelEmptyException("空文件流");
         }
         Inventor<T> inventor;
         OPCPackage pkg;
         POIFSFileSystem fileSystem;
-        try {
+        try (
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                InputStream xlsxStream = new ByteArrayInputStream(bos.toByteArray());
+        ) {
             byte[] buffer = new byte[1024];
             int len = 0;
             while ((len = inputStream.read(buffer)) != -1) {
                 bos.write(buffer, 0, len);
             }
-            InputStream xlsxStream = new ByteArrayInputStream(bos.toByteArray());
+
             pkg = OPCPackage.open(xlsxStream);
         } catch (NotOfficeXmlFileException e) {
-            InputStream xlsStream = new ByteArrayInputStream(bos.toByteArray());
-            fileSystem = new POIFSFileSystem(xlsStream);
-            return new ExcelInventor<>(tClass, fileSystem, formater, checkRuleEnum);
+            fileSystem = new POIFSFileSystem(inputStream);
+            return new ExcelInventor<>(tClass, fileSystem, formater, checkRuleEnum, sheetIndex);
         } catch (Exception e) {
             throw new ExcelException("文件解析错误");
         }
-        inventor = new ExcelXInventor<>(pkg, tClass, formater, checkRuleEnum);
+        inventor = new ExcelXInventor<>(pkg, tClass, formater, checkRuleEnum, sheetIndex);
         return inventor;
     }
 
@@ -297,31 +306,12 @@ public class ExcelFactory {
      * @param checkRuleEnum 校验类型
      * @param <T>
      * @return
-     * @throws InvalidFormatException
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(String filePath, Class<T> tClass,
                                                                             CheckRuleEnum checkRuleEnum)
-            throws InvalidFormatException, IOException {
+            throws IOException {
 
-        if (null == filePath || "".equals(filePath)) {
-            throw new ExcelEmptyException("空的文件路径");
-        }
-        Inventor<T> inventor;
-        File file = new File(filePath);
-        String fileHeader = getFileHeader(file);
-        if (null == fileHeader || "".equals(fileHeader)) {
-            throw new ExcelException("未知文件类型");
-        }
-        if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLS.getFileHeader())) {
-            POIFSFileSystem fileSystem = new POIFSFileSystem(file);
-            inventor = new ExcelInventor<>(tClass, fileSystem, checkRuleEnum);
-        } else if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLSX.getFileHeader())) {
-            OPCPackage pkg = OPCPackage.open(filePath);
-            inventor = new ExcelXInventor<>(pkg, tClass, checkRuleEnum);
-        } else {
-            throw new ExcelException("错误的文件类型");
-        }
-        return inventor;
+        return initInventor(filePath, tClass, new DefaultCellValueFormater(), checkRuleEnum, -1);
     }
 
     /**
@@ -331,12 +321,12 @@ public class ExcelFactory {
      * @param tClass   转化类
      * @param <T>
      * @return
-     * @throws InvalidFormatException
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(String filePath,
                                                                             Class<T> tClass,
-                                                                            CellValueFormater formater) throws InvalidFormatException {
-        return initInventor(filePath, tClass, formater, CheckRuleEnum.CONTINUE_WHEN_ERROR);
+                                                                            CellValueFormater formater) throws IOException {
+
+        return initInventor(filePath, tClass, formater, CheckRuleEnum.CONTINUE_WHEN_ERROR, -1);
     }
 
 
@@ -348,36 +338,17 @@ public class ExcelFactory {
      * @param checkRuleEnum 校验类型
      * @param <T>
      * @return
-     * @throws InvalidFormatException
      */
     public static <T extends InventorBeanTemplate> Inventor<T> initInventor(String filePath, Class<T> tClass,
                                                                             CellValueFormater formater,
-                                                                            CheckRuleEnum checkRuleEnum)
-            throws InvalidFormatException {
+                                                                            CheckRuleEnum checkRuleEnum,
+                                                                            int sheetIndex) throws IOException {
 
         if (null == filePath || "".equals(filePath)) {
             throw new ExcelEmptyException("空的文件路径");
         }
-        Inventor<T> inventor;
         File file = new File(filePath);
-        String fileHeader = getFileHeader(file);
-        if (null == fileHeader || "".equals(fileHeader)) {
-            throw new ExcelException("未知文件类型");
-        }
-        if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLS.getFileHeader())) {
-            try {
-                POIFSFileSystem fileSystem = new POIFSFileSystem(file);
-                inventor = new ExcelInventor<>(tClass, fileSystem, formater, checkRuleEnum);
-            } catch (IOException e) {
-                throw new ExcelException("文件解析错误");
-            }
-        } else if (fileHeader.equals(ExcelTypeEnum.EXCEL_XLSX.getFileHeader())) {
-            OPCPackage pkg = OPCPackage.open(filePath);
-            inventor = new ExcelXInventor<>(pkg, tClass, formater, checkRuleEnum);
-        } else {
-            throw new ExcelException("错误的文件类型");
-        }
-        return inventor;
+        return initInventor(file, tClass, formater, checkRuleEnum, sheetIndex);
     }
 
     /**

@@ -145,25 +145,16 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
     private final OPCPackage xlsxPackage;
 
 
-    /**
-     * OPCPackage
-     *
-     * @param pkg The XLSX package to process
-     */
-    public ExcelXInventor(OPCPackage pkg, Class<T> clazz, CheckRuleEnum checkRuleEnum) throws ExcelException {
-        super(clazz);
-        this.xlsxPackage = pkg;
-        super.formater = new DefaultCellValueFormater();
-        super.checkRuleEnum = checkRuleEnum;
-    }
 
     /**
      * OPCPackage
      *
      * @param pkg The XLSX package to process
      */
-    public ExcelXInventor(OPCPackage pkg, Class<T> clazz, CellValueFormater formater, CheckRuleEnum checkRuleEnum) throws ExcelException {
+    public ExcelXInventor(OPCPackage pkg, Class<T> clazz, CellValueFormater formater,
+                          CheckRuleEnum checkRuleEnum,int sheetIndex) throws ExcelException {
         super(clazz);
+        super.sheetIndex = sheetIndex;
         this.xlsxPackage = pkg;
         super.formater = formater;
         super.checkRuleEnum = checkRuleEnum;
@@ -202,10 +193,14 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         XSSFReader xssfReader = new XSSFReader(this.xlsxPackage);
         StylesTable styles = xssfReader.getStylesTable();
         XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
+        int index = 0;
         while (iter.hasNext()) {
-            try (InputStream stream = iter.next()) {
-                parseSheet(styles, strings, new SheetToObject(), stream);
+            if(sheetIndex < 0 || sheetIndex == index){
+                try (InputStream stream = iter.next()) {
+                    parseSheet(styles, strings, new SheetToObject(), stream);
+                }
             }
+            index ++ ;
         }
         return getResult();
     }

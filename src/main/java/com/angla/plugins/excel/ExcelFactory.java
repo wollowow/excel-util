@@ -20,6 +20,7 @@ import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.util.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -261,19 +262,15 @@ public class ExcelFactory {
         Inventor<T> inventor;
         OPCPackage pkg;
         POIFSFileSystem fileSystem;
-        try (
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                InputStream xlsxStream = new ByteArrayInputStream(bos.toByteArray());
-        ) {
-            byte[] buffer = new byte[1024];
-            int len = 0;
-            while ((len = inputStream.read(buffer)) != -1) {
-                bos.write(buffer, 0, len);
-            }
-
+        byte[] data = IOUtils.toByteArray(inputStream);
+        try{
+            InputStream xlsxStream = new ByteArrayInputStream(data);
             pkg = OPCPackage.open(xlsxStream);
+            xlsxStream.close();
         } catch (NotOfficeXmlFileException e) {
-            fileSystem = new POIFSFileSystem(inputStream);
+            InputStream xlsxStream = new ByteArrayInputStream(data);
+            fileSystem = new POIFSFileSystem(xlsxStream);
+            xlsxStream.close();
             return new ExcelInventor<>(tClass, fileSystem, formater, checkRuleEnum, sheetIndex);
         } catch (Exception e) {
             throw new ExcelException("文件解析错误");

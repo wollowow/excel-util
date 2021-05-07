@@ -145,14 +145,13 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
     private final OPCPackage xlsxPackage;
 
 
-
     /**
      * OPCPackage
      *
      * @param pkg The XLSX package to process
      */
     public ExcelXInventor(OPCPackage pkg, Class<T> clazz, CellValueFormater formater,
-                          CheckRuleEnum checkRuleEnum,int sheetIndex) throws ExcelException {
+                          CheckRuleEnum checkRuleEnum, int sheetIndex) throws ExcelException {
         super(clazz);
         super.sheetIndex = sheetIndex;
         this.xlsxPackage = pkg;
@@ -195,12 +194,12 @@ public class ExcelXInventor<T extends InventorBeanTemplate> extends AbstractInve
         XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
         int index = 0;
         while (iter.hasNext()) {
-            if(sheetIndex < 0 || sheetIndex == index){
-                try (InputStream stream = iter.next()) {
+            try (InputStream stream = iter.next()) {
+                if (sheetIndex < 0 || sheetIndex == index) {
                     parseSheet(styles, strings, new SheetToObject(), stream);
                 }
             }
-            index ++ ;
+            index++;
         }
         return getResult();
     }

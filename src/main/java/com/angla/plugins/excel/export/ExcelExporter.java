@@ -7,6 +7,7 @@ import com.angla.plugins.excel.export.anno.ExportAnnoManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.util.List;
 
@@ -23,8 +24,20 @@ public class ExcelExporter<T> extends AbstractExporter<T> {
         super(data, ExcelTypeEnum.EXCEL_XLS, columns, showErrMsg);
     }
 
+
     @Override
     public Workbook generalExport() throws Exception {
+        return generalExport(null);
+    }
+
+    @Override
+    public Workbook generalExport(Workbook workbook) throws Exception {
+        if (null == workbook) {
+            workbook = new HSSFWorkbook();
+        }
+        if (!(workbook instanceof HSSFWorkbook)) {
+            throw new ParameterException("传入workbook类型错误");
+        }
         if (null == data) {
             throw new ParameterException("传入参数错误");
         }
@@ -33,8 +46,7 @@ public class ExcelExporter<T> extends AbstractExporter<T> {
             throw new ExcelEmptyException("导出数据为空！");
         }
         ExportAnnoManager exportAnnoManager = new ExportAnnoManager(list, data.get(0).getClass(), columns, showErrMsg);
-        HSSFWorkbook workBook = new HSSFWorkbook();
-        return buildWorkbook(exportAnnoManager.getTitles(), exportAnnoManager.getDatas(), workBook);
+        return buildWorkbook(exportAnnoManager.getTitles(), exportAnnoManager.getDatas(), workbook);
     }
 
 }

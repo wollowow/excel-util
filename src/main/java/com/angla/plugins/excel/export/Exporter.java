@@ -17,9 +17,19 @@ public interface Exporter<T> {
      */
     Workbook generalExport() throws Exception;
 
+
+    /**
+     * 对象导出
+     * @param workbook
+     * @return
+     * @throws Exception
+     */
+    Workbook generalExport(Workbook workbook) throws Exception;
+
     /**
      * 直接导出list数据
      * 非格式化数据导出
+     *
      * @return
      * @throws Exception
      */

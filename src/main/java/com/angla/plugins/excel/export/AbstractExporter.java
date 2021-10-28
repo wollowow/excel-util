@@ -55,6 +55,9 @@ public abstract class AbstractExporter<T> implements Exporter<T> {
     public abstract Workbook generalExport() throws Exception;
 
     @Override
+    public abstract Workbook generalExport(Workbook workbook) throws Exception;
+
+    @Override
     public Workbook listExport() {
         boolean flag = data != null;
         if (!flag) {
